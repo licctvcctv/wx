@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学科管理 - 学习游戏平台管理后台</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.1/css/dataTables.bootstrap5.min.css">
+    <style>
+        .card {
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            margin-bottom: 1.5rem;
+        }
+        .btn-circle {
+            width: 2rem;
+            height: 2rem;
+            padding: 0.375rem;
+            border-radius: 50%;
+            text-align: center;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold">学科列表</h6>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSubjectModal">
+                        <i class="bi bi-plus"></i> 添加学科
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="subjectsTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>名称</th>
+                                <th>描述</th>
+                                <th>图标</th>
+                                <th>状态</th>
+                                <th>创建时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subjectsTableBody">
+                            <!-- 表格数据将通过JavaScript动态加载 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加学科模态框 -->
+    <div class="modal fade" id="addSubjectModal" tabindex="-1" aria-labelledby="addSubjectModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addSubjectModalLabel">添加学科</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addSubjectForm">
+                        <div class="mb-3">
+                            <label for="subjectName" class="form-label">学科名称</label>
+                            <input type="text" class="form-control" id="subjectName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="subjectDescription" class="form-label">学科描述</label>
+                            <textarea class="form-control" id="subjectDescription" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="subjectIcon" class="form-label">学科图标URL</label>
+                            <input type="text" class="form-control" id="subjectIcon" placeholder="例如：https://example.com/icon.png">
+                            <small class="form-text text-muted">如不填写，将使用默认图标</small>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="subjectActive" checked>
+                                <label class="form-check-label" for="subjectActive">
+                                    启用学科
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="saveSubjectBtn">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑学科模态框 -->
+    <div class="modal fade" id="editSubjectModal" tabindex="-1" aria-labelledby="editSubjectModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editSubjectModalLabel">编辑学科</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editSubjectForm">
+                        <input type="hidden" id="editSubjectId">
+                        <div class="mb-3">
+                            <label for="editSubjectName" class="form-label">学科名称</label>
+                            <input type="text" class="form-control" id="editSubjectName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editSubjectDescription" class="form-label">学科描述</label>
+                            <textarea class="form-control" id="editSubjectDescription" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editSubjectIcon" class="form-label">学科图标URL</label>
+                            <input type="text" class="form-control" id="editSubjectIcon" placeholder="例如：https://example.com/icon.png">
+                            <small class="form-text text-muted">如不填写，将使用默认图标</small>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="editSubjectActive">
+                                <label class="form-check-label" for="editSubjectActive">
+                                    启用学科
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="updateSubjectBtn">更新</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.1/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.1/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        let subjectsTable;
+        
+        $(document).ready(function() {
+            const baseUrl = window.location.protocol + '//' + window.location.host;
+            const token = localStorage.getItem('adminToken');
+            
+            if (!token) {
+                window.parent.location.href = '../login.html';
+                return;
+            }
+            
+            // 初始化DataTable
+            subjectsTable = $('#subjectsTable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.1/i18n/zh.json'
+                },
+                columns: [
+                    { data: 'id' },
+                    { data: 'name' },
+                    { data: 'description' },
+                    { 
+                        data: 'iconUrl',
+                        render: function(data) {
+                            if (data) {
+                                return `<img src="${data}" width="50" height="50" alt="学科图标">`;
+                            }
+                            return '<i class="bi bi-book" style="font-size: 2rem;"></i>';
+                        } 
+                    },
+                    { 
+                        data: 'status',
+                        render: function(data) {
+                            return data === 1 ? 
+                                '<span class="badge bg-success">启用</span>' : 
+                                '<span class="badge bg-danger">禁用</span>';
+                        } 
+                    },
+                    { 
+                        data: 'createTime',
+                        render: function(data) {
+                            return new Date(data).toLocaleString();
+                        } 
+                    },
+                    {
+                        data: null,
+                        orderable: false,
+                        render: function(data) {
+                            return `
+                                <button class="btn btn-primary btn-circle edit-subject" data-id="${data.id}" title="编辑">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-danger btn-circle delete-subject" data-id="${data.id}" title="删除">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            `;
+                        }
+                    }
+                ]
+            });
+            
+            // 加载学科数据
+            loadSubjects();
+            
+            // 添加学科
+            $('#saveSubjectBtn').click(function() {
+                const name = $('#subjectName').val();
+                const description = $('#subjectDescription').val();
+                const iconUrl = $('#subjectIcon').val();
+                const status = $('#subjectActive').is(':checked') ? 1 : 0;
+                
+                if (!name) {
+                    alert('请输入学科名称');
+                    return;
+                }
+                
+                const subject = {
+                    name: name,
+                    description: description,
+                    iconUrl: iconUrl,
+                    status: status
+                };
+                
+                fetch('/api/admin/subjects', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(subject)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('添加学科失败');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.code === 200) {
+                        $('#addSubjectModal').modal('hide');
+                        $('#addSubjectForm')[0].reset();
+                        loadSubjects();
+                        alert('学科添加成功');
+                    } else {
+                        alert('添加失败：' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('添加失败，请稍后重试');
+                });
+            });
+            
+            // 编辑学科按钮点击事件
+            $('#subjectsTable').on('click', '.edit-subject', function() {
+                const id = $(this).data('id');
+                const subject = subjectsTable.rows().data().toArray().find(s => s.id === id);
+                
+                if (subject) {
+                    $('#editSubjectId').val(subject.id);
+                    $('#editSubjectName').val(subject.name);
+                    $('#editSubjectDescription').val(subject.description);
+                    $('#editSubjectIcon').val(subject.iconUrl);
+                    $('#editSubjectActive').prop('checked', subject.status === 1);
+                    
+                    $('#editSubjectModal').modal('show');
+                }
+            });
+            
+            // 编辑学科
+            $('#updateSubjectBtn').click(function() {
+                const id = $('#editSubjectId').val();
+                const name = $('#editSubjectName').val();
+                const description = $('#editSubjectDescription').val();
+                const iconUrl = $('#editSubjectIcon').val();
+                const status = $('#editSubjectActive').is(':checked') ? 1 : 0;
+                
+                if (!name) {
+                    alert('请输入学科名称');
+                    return;
+                }
+                
+                const subject = {
+                    id: id,
+                    name: name,
+                    description: description,
+                    iconUrl: iconUrl,
+                    status: status
+                };
+                
+                fetch('/api/admin/subjects/' + id, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(subject)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('更新学科失败');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.code === 200) {
+                        $('#editSubjectModal').modal('hide');
+                        loadSubjects();
+                        alert('学科更新成功');
+                    } else {
+                        alert('更新失败：' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('更新失败，请稍后重试');
+                });
+            });
+            
+            // 删除学科按钮点击事件
+            $('#subjectsTable').on('click', '.delete-subject', function() {
+                const id = $(this).data('id');
+                
+                if (confirm('确定要删除该学科吗？删除后不可恢复，且会影响关联的章节和关卡数据！')) {
+                    fetch('/api/admin/subjects/' + id, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': 'Bearer ' + token
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('删除学科失败');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.code === 200) {
+                            loadSubjects();
+                            alert('学科删除成功');
+                        } else {
+                            alert('删除失败：' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('删除失败，请稍后重试');
+                    });
+                }
+            });
+            
+            // 加载学科数据的函数
+            function loadSubjects() {
+                fetch('/api/admin/subjects', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('获取学科数据失败');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.code === 200) {
+                        subjectsTable.clear();
+                        if (data.data && data.data.length > 0) {
+                            subjectsTable.rows.add(data.data).draw();
+                        } else {
+                            // 如果没有数据，显示空表格
+                            subjectsTable.draw();
+                        }
+                    } else {
+                        console.error('Failed to load subjects:', data.message);
+                        alert('加载学科数据失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading subjects:', error);
+                    alert('加载学科数据失败，请稍后重试');
+                    subjectsTable.clear().draw();
+                });
+            }
+        });
+    </script>
+</body>
+</html>

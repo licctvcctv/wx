@@ -1,0 +1,116 @@
+/* pages/chapters/chapters.wxss */
+.subject-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.subject-name {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.subject-desc {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.nav-back image {
+  width: 40rpx;
+  height: 40rpx;
+}
+
+.chapter-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.chapter-info {
+  flex: 1;
+}
+
+.chapter-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10rpx;
+}
+
+.chapter-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.chapter-difficulty {
+  display: flex;
+  align-items: center;
+}
+
+.star-icon {
+  width: 24rpx;
+  height: 24rpx;
+  margin-left: 4rpx;
+}
+
+.chapter-desc {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 16rpx;
+}
+
+.progress-bar {
+  height: 8rpx;
+  background-color: #f0f0f0;
+  border-radius: 4rpx;
+  overflow: hidden;
+  margin-bottom: 8rpx;
+}
+
+.progress-inner {
+  height: 100%;
+  background-color: #3A7EE9;
+}
+
+.progress-text {
+  font-size: 24rpx;
+  color: #999;
+  text-align: right;
+}
+
+.chapter-arrow image {
+  width: 32rpx;
+  height: 32rpx;
+}
+
+.empty-tip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 0;
+}
+
+.empty-tip image {
+  width: 200rpx;
+  height: 200rpx;
+  margin-bottom: 20rpx;
+}
+
+.empty-tip view {
+  font-size: 28rpx;
+  color: #999;
+}

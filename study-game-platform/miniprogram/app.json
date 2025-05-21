@@ -1,0 +1,48 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/login/login",
+    "pages/register/register",
+    "pages/subjects/subjects",
+    "pages/chapters/chapters",
+    "pages/levels/levels",
+    "pages/game/game",
+    "pages/wrong-questions/wrong-questions",
+    "pages/userStats/userStats",
+    "pages/user/user"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#3A7EE9",
+    "navigationBarTitleText": "学习闯关平台",
+    "navigationBarTextStyle": "white"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#3A7EE9",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/subjects/subjects",
+        "text": "学习",
+        "iconPath": "images/study.png",
+        "selectedIconPath": "images/study-active.png"
+      },
+      {
+        "pagePath": "pages/wrong-questions/wrong-questions",
+        "text": "错题本",
+        "iconPath": "images/wrong.png",
+        "selectedIconPath": "images/wrong-active.png"
+      },
+      {
+        "pagePath": "pages/user/user",
+        "text": "我的",
+        "iconPath": "images/user.png",
+        "selectedIconPath": "images/user-active.png"
+      }
+    ]
+  },
+  "usingComponents": {},
+  "sitemapLocation": "sitemap.json"
+}

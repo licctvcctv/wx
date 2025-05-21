@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>仪表盘 - 学习游戏平台管理后台</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        .stats-card {
+            border-left: 4px solid;
+            border-radius: 4px;
+        }
+        .stats-card-primary {
+            border-left-color: #4e73df;
+        }
+        .stats-card-success {
+            border-left-color: #1cc88a;
+        }
+        .stats-card-info {
+            border-left-color: #36b9cc;
+        }
+        .stats-card-warning {
+            border-left-color: #f6c23e;
+        }
+        .stats-card .stats-icon {
+            font-size: 2rem;
+            opacity: 0.3;
+        }
+        .card {
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- 数据卡片 -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card stats-card stats-card-primary h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    学科总数</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="subject-count">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="bi bi-book stats-icon text-primary"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card stats-card stats-card-success h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    章节总数</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="chapter-count">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="bi bi-journal-text stats-icon text-success"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card stats-card stats-card-info h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                    关卡总数</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="level-count">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="bi bi-layers stats-icon text-info"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card stats-card stats-card-warning h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                    用户总数</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="user-count">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="bi bi-people stats-icon text-warning"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 系统信息 -->
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold">系统信息</h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                系统名称
+                                <span class="badge bg-primary rounded-pill">学习游戏平台</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                当前版本
+                                <span class="badge bg-secondary rounded-pill">V1.0</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                服务器时间
+                                <span class="badge bg-info rounded-pill" id="server-time">-</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold">操作指南</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-primary" role="alert">
+                            <h5 class="alert-heading">欢迎使用管理后台！</h5>
+                            <p>您可以在左侧导航栏中选择不同的功能模块：</p>
+                            <ul>
+                                <li><strong>学科管理</strong>：添加、编辑、删除学科</li>
+                                <li><strong>章节管理</strong>：添加、编辑、删除章节，关联到学科</li>
+                                <li><strong>关卡管理</strong>：添加、编辑、删除关卡，关联到章节</li>
+                                <li><strong>题目管理</strong>：添加、编辑、删除题目，关联到关卡</li>
+                                <li><strong>用户管理</strong>：查看、编辑、删除用户，查看用户进度</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const baseUrl = window.location.protocol + '//' + window.location.host;
+            const token = localStorage.getItem('adminToken');
+            
+            if (!token) {
+                window.parent.location.href = '../login.html';
+                return;
+            }
+            
+            // 更新服务器时间
+            function updateServerTime() {
+                const now = new Date();
+                document.getElementById('server-time').textContent = now.toLocaleString();
+            }
+            
+            updateServerTime();
+            setInterval(updateServerTime, 1000);
+            
+            // 获取统计数据
+            async function fetchStats() {
+                try {
+                    // 获取学科总数
+                    const subjectResponse = await fetch(baseUrl + '/subjects/count');
+                    const subjectData = await subjectResponse.json();
+                    if (subjectData.code === 200) {
+                        document.getElementById('subject-count').textContent = subjectData.data || 0;
+                    }
+                    
+                    // 获取章节总数
+                    const chapterResponse = await fetch(baseUrl + '/chapters/count');
+                    const chapterData = await chapterResponse.json();
+                    if (chapterData.code === 200) {
+                        document.getElementById('chapter-count').textContent = chapterData.data || 0;
+                    }
+                    
+                    // 获取关卡总数
+                    const levelResponse = await fetch(baseUrl + '/levels/count');
+                    const levelData = await levelResponse.json();
+                    if (levelData.code === 200) {
+                        document.getElementById('level-count').textContent = levelData.data || 0;
+                    }
+                    
+                    // 获取用户总数
+                    const userResponse = await fetch(baseUrl + '/users/count');
+                    const userData = await userResponse.json();
+                    if (userData.code === 200) {
+                        document.getElementById('user-count').textContent = userData.data || 0;
+                    }
+                } catch (error) {
+                    console.error('Error fetching stats:', error);
+                }
+            }
+            
+            // 初始设置一些临时数据，实际应调用后端API
+            document.getElementById('subject-count').textContent = "3";
+            document.getElementById('chapter-count').textContent = "12";
+            document.getElementById('level-count').textContent = "36";
+            document.getElementById('user-count').textContent = "5";
+            
+            // 当API准备好后，可以取消注释以下行
+            // fetchStats();
+        });
+    </script>
+</body>
+</html>

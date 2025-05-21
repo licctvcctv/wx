@@ -1,0 +1,569 @@
+/* pages/wrong-questions/wrong-questions.wxss */
+.container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 40rpx;
+  background-color: #f6f6f6;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  height: 90rpx;
+  padding: 0 30rpx;
+  background-color: #3a7bd5;
+  position: relative;
+}
+
+.back-button {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-button .icon-back {
+  color: #fff;
+  font-size: 40rpx;
+}
+
+.title {
+  flex: 1;
+  text-align: center;
+  font-size: 36rpx;
+  color: #fff;
+  margin-right: 60rpx;
+}
+
+.tab-bar {
+  display: flex;
+  height: 80rpx;
+  background-color: #fff;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.tab-item {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  color: #666;
+  position: relative;
+}
+
+.tab-item.active {
+  color: #3a7bd5;
+}
+
+.tab-item.active:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  width: 40%;
+  height: 6rpx;
+  background-color: #3a7bd5;
+  border-radius: 3rpx;
+}
+
+.wrong-questions-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 30rpx;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200rpx;
+  font-size: 28rpx;
+  color: #999;
+}
+
+.empty-tips {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 0;
+}
+
+.empty-image {
+  width: 200rpx;
+  height: 200rpx;
+  margin-bottom: 20rpx;
+}
+
+.empty-tips text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+.question-item {
+  margin-bottom: 30rpx;
+  background-color: #fff;
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.question-header {
+  display: flex;
+  align-items: center;
+  padding: 30rpx;
+  position: relative;
+}
+
+.question-title {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  font-size: 32rpx;
+  color: #333;
+  line-height: 1.4;
+}
+
+.question-number {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  background-color: #3a7bd5;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+/* 分类列表样式 */
+.category-list {
+  padding: 20rpx 0;
+}
+
+.category-item {
+  display: flex;
+  align-items: center;
+  padding: 30rpx;
+  background-color: #fff;
+  margin-bottom: 20rpx;
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.category-name {
+  flex: 1;
+  font-size: 32rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.category-count {
+  font-size: 28rpx;
+  color: #3a7bd5;
+  margin-right: 20rpx;
+}
+
+.item-arrow {
+  color: #999;
+  font-size: 32rpx;
+}
+
+/* 分类详情页样式 */
+.category-header {
+  display: flex;
+  flex-direction: column;
+  padding: 20rpx 30rpx;
+  background-color: #f8f8f8;
+  margin-bottom: 20rpx;
+}
+
+.back-link {
+  display: flex;
+  align-items: center;
+  font-size: 28rpx;
+  color: #3a7bd5;
+  margin-bottom: 10rpx;
+}
+
+.back-link .iconfont {
+  margin-right: 10rpx;
+  font-size: 24rpx;
+}
+
+.current-category {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+}
+
+.current-category .count {
+  font-size: 28rpx;
+  color: #666;
+  font-weight: normal;
+  margin-left: 20rpx;
+}
+
+.question-action {
+  padding: 10rpx;
+}
+
+.icon-up, .icon-down {
+  font-size: 32rpx;
+  color: #999;
+}
+
+.question-detail {
+  padding: 0 30rpx 30rpx;
+  border-top: 2rpx solid #f5f5f5;
+}
+
+.options {
+  margin-bottom: 30rpx;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  padding: 20rpx;
+  background-color: #f9f9f9;
+  border-radius: 6rpx;
+  margin-bottom: 20rpx;
+}
+
+.option-label {
+  width: 40rpx;
+  height: 40rpx;
+  line-height: 40rpx;
+  background-color: #ddd;
+  border-radius: 50%;
+  text-align: center;
+  font-size: 24rpx;
+  color: #666;
+  margin-right: 20rpx;
+}
+
+.option-content {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.option.correct {
+  background-color: rgba(46, 204, 113, 0.1);
+  border: 1rpx solid #2ecc71;
+}
+
+.option.correct .option-label {
+  background-color: #2ecc71;
+  color: #fff;
+}
+
+.option.wrong {
+  background-color: rgba(231, 76, 60, 0.1);
+  border: 1rpx solid #e74c3c;
+}
+
+.option.wrong .option-label {
+  background-color: #e74c3c;
+  color: #fff;
+}
+
+.option.selected {
+  background-color: rgba(52, 152, 219, 0.1);
+  border: 1rpx solid #3498db;
+}
+
+.option.selected .option-label {
+  background-color: #3498db;
+  color: #fff;
+}
+
+.answer-explanation {
+  padding: 20rpx;
+  background-color: #f5f5f5;
+  border-radius: 6rpx;
+}
+
+.answer-info {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 20rpx;
+}
+
+.answer-info text {
+  margin-right: 30rpx;
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.explanation {
+  margin-top: 10rpx;
+}
+
+.explanation-title {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: bold;
+  margin-right: 10rpx;
+}
+
+.explanation-content {
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.6;
+}
+
+/* 添加错题分析按钮样式 */
+.analysis-button {
+  margin-top: 20rpx;
+  width: 100%;
+  height: 70rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #3a7bd5;
+  color: #fff;
+  font-size: 28rpx;
+  border-radius: 35rpx;
+}
+
+/* 错题分析面板样式 */
+.analysis-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  z-index: 999;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.analysis-panel.show {
+  transform: translateY(0);
+}
+
+.analysis-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 30rpx;
+  border-bottom: 1rpx solid #eee;
+}
+
+.analysis-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.close-button {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48rpx;
+  color: #999;
+}
+
+.analysis-content {
+  flex: 1;
+  padding: 30rpx;
+  overflow-y: auto;
+}
+
+.question-card {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.analysis-section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+  padding-left: 20rpx;
+  border-left: 6rpx solid #3a7bd5;
+}
+
+.analysis-text {
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 20rpx;
+}
+
+.error-analysis {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.error-pattern {
+  margin-top: 20rpx;
+  padding: 20rpx;
+  background-color: #fcf8e3;
+  border-radius: 6rpx;
+}
+
+.error-pattern text {
+  font-size: 28rpx;
+  color: #8a6d3b;
+}
+
+.similar-questions {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.training-desc {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 30rpx;
+}
+
+.start-training-button {
+  width: 100%;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #3a7bd5;
+  color: #fff;
+  font-size: 30rpx;
+  border-radius: 40rpx;
+}
+
+/* 训练模式界面样式 */
+.training-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 30rpx;
+}
+
+.training-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30rpx;
+}
+
+.training-header text {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: bold;
+}
+
+.back-to-analysis {
+  font-size: 28rpx;
+  color: #3a7bd5;
+}
+
+.training-question {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.training-feedback {
+  padding: 20rpx;
+  margin: 20rpx 0;
+  border-radius: 6rpx;
+}
+
+.correct-feedback {
+  background-color: rgba(46, 204, 113, 0.1);
+  border: 1rpx solid #2ecc71;
+  padding: 20rpx;
+  font-size: 30rpx;
+  color: #2ecc71;
+  border-radius: 6rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.wrong-feedback {
+  background-color: rgba(231, 76, 60, 0.1);
+  border: 1rpx solid #e74c3c;
+  padding: 20rpx;
+  font-size: 30rpx;
+  color: #e74c3c;
+  border-radius: 6rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.training-actions {
+  margin-top: 30rpx;
+}
+
+.submit-button, .next-button {
+  width: 100%;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f1f1f1;
+  color: #999;
+  font-size: 30rpx;
+  border-radius: 40rpx;
+}
+
+.submit-button.active, .next-button.active {
+  background-color: #3a7bd5;
+  color: #fff;
+}
+
+/* 字体图标 */
+@font-face {
+  font-family: 'iconfont';
+  src: url('data:font/truetype;charset=utf-8;base64,AAEAAAALAIAAAwAwR1NVQrD+s+0AAAE4AAAAQk9TLzI8fEg3AAABfAAAAFZjbWFw+X+MkQAAAeQAAAGiZ2x5ZmWaoakAAAOcAAABdGhlYWQfTOf9AAAA4AAAADZoaGVhB94DhgAAALwAAAAkaG10eBAA//8AAAHUAAAAEGxvY2EBEQC6AAADkAAAAAptYXhwARIAWgAAARgAAAAgbmFtZT5U/n0AAATQAAACZ3Bvc3QAAwAAAAAHOAAAACAAAwIAAZAABQAAApkCzAAAAI8CmQLMAAAB6wAzAQkAAAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAAAAAAAABAAADpAQPA/8AAQAPAAEAAAAABAAAAAAAAAAAAAAAgAAAAAAADAAAAAwAAABwAAQADAAAAHAADAAEAAAAcAAQBiAAAAF4AQAAFAD4AAQAg4DTgN+A74EnwAfEH8Qvx0PTY9hv3BfcY92D3oPfc9+P38Pf19/z4A/gE+Az4T/hX+Gj5A/kE+Q/5I/kt+TH5Rvla+V75YPlp+Wv5bfl5+X/5gOkB//8AAAAAIOAA4DTgN+A74EnwAfEH8Qvx0PTY9hv3BfcY92D3oPfc9+P38Pf19/z4A/gE+Az4T/hX+Gj5A/kE+Q/5I/kt+TH5Rvla+V75YPlp+Wv5bfl5+X/5gOkB//8AAf/jIAQf9h/0H/Ef4RD/D/sP+A+MDi4OYg3gDdENrQ1uDS0MhQx4DGwMaAxpDGMMYgxbDBkMEgwBDGUMZAxaDE8MRQw8DDgMKQwVDBIMEQwQDAsMCgwJDAgMBgwFJwAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAf//AA8AAQAAAAEAAFrW9Y5fDzz1AAsEAAAAAADeCggcAAAAAN4KCBwAAP/ABAEDwAAAAAgAAgAAAAAAAAABAAADwP/AAAAEAAAAAAABAQABAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAIAAAAAAAAAAAUAAAADAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAQAAAAKAAAAAAAAA');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 32rpx;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-back:before {
+  content: "\e60f";
+}
+
+.icon-down:before {
+  content: "\e61a";
+}
+
+.icon-up:before {
+  content: "\e61b";
+}

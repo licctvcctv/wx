@@ -1,0 +1,228 @@
+<!--pages/wrong-questions/wrong-questions.wxml-->
+<view class="container">
+  <view class="header">
+    <view class="back-button" bindtap="goBack">
+      <text class="iconfont icon-back"></text>
+    </view>
+    <view class="title">错题本</view>
+  </view>
+
+  <view class="tab-bar">
+    <view class="tab-item {{selectedTab === 'levels' ? 'active' : ''}}" bindtap="switchTab" data-tab="levels">
+      按关卡
+    </view>
+    <view class="tab-item {{selectedTab === 'chapters' ? 'active' : ''}}" bindtap="switchTab" data-tab="chapters">
+      按章节
+    </view>
+    <view class="tab-item {{selectedTab === 'subjects' ? 'active' : ''}}" bindtap="switchTab" data-tab="subjects">
+      按学科
+    </view>
+  </view>
+
+  <view class="wrong-questions-list">
+    <view class="loading" wx:if="{{loading}}">
+      <text>加载中...</text>
+    </view>
+
+    <view class="empty-tips" wx:if="{{!loading && !showCategoryDetail && categoryList.length === 0}}">
+      <image src="/static/images/empty.png" mode="aspectFit" class="empty-image"></image>
+      <text>{{emptyTips}}</text>
+    </view>
+
+    <!-- 分类列表显示 -->
+    <view class="category-list" wx:if="{{!showCategoryDetail && categoryList.length > 0}}">
+      <view class="category-item" wx:for="{{categoryList}}" wx:key="id" bindtap="selectCategory" data-id="{{item.id}}" data-name="{{item.name}}">
+        <view class="category-name">{{item.name}}</view>
+        <!-- <view class="category-count">错题: {{item.wrongCount}}</view> -->
+        <view class="item-arrow">
+          <text class="iconfont icon-right"></text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 错题列表显示 -->
+    <block wx:if="{{showCategoryDetail}}">
+      <view class="category-header">
+        <view class="back-link" bindtap="backToCategories">
+          <text class="iconfont icon-back"></text>
+          <text>返回{{categoryTypeName}}列表</text>
+        </view>
+        <view class="current-category">
+          <text>{{currentCategoryName}}</text>
+          <text class="count">(错题数: {{wrongQuestions.length}})</text>
+        </view>
+      </view>
+
+      <view class="empty-tips" wx:if="{{!loading && wrongQuestions.length === 0}}">
+        <image src="/static/images/empty.png" mode="aspectFit" class="empty-image"></image>
+        <text>没有找到错题</text>
+      </view>
+
+      <view class="question-item" wx:for="{{wrongQuestions}}" wx:key="index">
+        <view class="question-header" bindtap="viewQuestionDetail" data-index="{{index}}">
+          <view class="question-title">
+            <text class="question-number">{{index + 1}}</text>
+            <text>{{item.content}}</text>
+          </view>
+          <view class="question-action">
+            <text class="iconfont {{item.showDetail ? 'icon-up' : 'icon-down'}}"></text>
+          </view>
+        </view>
+
+        <view class="question-detail" wx:if="{{item.showDetail}}">
+          <view class="options">
+            <view class="option {{item.correctAnswer === 'A' ? 'correct' : ''}} {{item.userAnswer === 'A' && item.userAnswer !== item.correctAnswer ? 'wrong' : ''}}">
+              <text class="option-label">A</text>
+              <text class="option-content">{{item.optionA || ''}}</text>
+            </view>
+            
+            <view class="option {{item.correctAnswer === 'B' ? 'correct' : ''}} {{item.userAnswer === 'B' && item.userAnswer !== item.correctAnswer ? 'wrong' : ''}}">
+              <text class="option-label">B</text>
+              <text class="option-content">{{item.optionB || ''}}</text>
+            </view>
+            
+            <view class="option {{item.correctAnswer === 'C' ? 'correct' : ''}} {{item.userAnswer === 'C' && item.userAnswer !== item.correctAnswer ? 'wrong' : ''}}">
+              <text class="option-label">C</text>
+              <text class="option-content">{{item.optionC || ''}}</text>
+            </view>
+            
+            <view class="option {{item.correctAnswer === 'D' ? 'correct' : ''}} {{item.userAnswer === 'D' && item.userAnswer !== item.correctAnswer ? 'wrong' : ''}}">
+              <text class="option-label">D</text>
+              <text class="option-content">{{item.optionD || ''}}</text>
+            </view>
+          </view>
+
+          <view class="answer-explanation">
+            <view class="answer-info">
+              <text>正确答案: {{item.correctAnswer}}</text>
+              <text>你的答案: {{item.userAnswer}}</text>
+            </view>
+            <view class="explanation" wx:if="{{item.explanation}}">
+              <text class="explanation-title">解析:</text>
+              <text class="explanation-content">{{item.explanation}}</text>
+            </view>
+            
+            <!-- 添加错题分析按钮 -->
+            <view class="analysis-button" bindtap="showAnalysis" data-id="{{item.id}}">
+              <text>查看详细分析</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </block>
+  </view>
+  
+  <!-- 错题分析面板 -->
+  <view class="analysis-panel {{showAnalysisPanel ? 'show' : ''}}" wx:if="{{showAnalysisPanel}}">
+    <view class="analysis-header">
+      <view class="analysis-title">错题分析</view>
+      <view class="close-button" bindtap="closeAnalysis">×</view>
+    </view>
+    
+    <scroll-view scroll-y="true" class="analysis-content" wx:if="{{!trainingMode}}">
+      <view class="question-card">
+        <view class="question-title">{{currentAnalysis.question.content}}</view>
+        
+        <view class="options">
+          <view class="option {{currentAnalysis.question.correctAnswer === 'A' ? 'correct' : ''}} {{currentAnalysis.userAnswer === 'A' && currentAnalysis.userAnswer !== currentAnalysis.question.correctAnswer ? 'wrong' : ''}}">
+            <text class="option-label">A</text>
+            <text class="option-content">{{currentAnalysis.question.optionA || ''}}</text>
+          </view>
+          
+          <view class="option {{currentAnalysis.question.correctAnswer === 'B' ? 'correct' : ''}} {{currentAnalysis.userAnswer === 'B' && currentAnalysis.userAnswer !== currentAnalysis.question.correctAnswer ? 'wrong' : ''}}">
+            <text class="option-label">B</text>
+            <text class="option-content">{{currentAnalysis.question.optionB || ''}}</text>
+          </view>
+          
+          <view class="option {{currentAnalysis.question.correctAnswer === 'C' ? 'correct' : ''}} {{currentAnalysis.userAnswer === 'C' && currentAnalysis.userAnswer !== currentAnalysis.question.correctAnswer ? 'wrong' : ''}}">
+            <text class="option-label">C</text>
+            <text class="option-content">{{currentAnalysis.question.optionC || ''}}</text>
+          </view>
+          
+          <view class="option {{currentAnalysis.question.correctAnswer === 'D' ? 'correct' : ''}} {{currentAnalysis.userAnswer === 'D' && currentAnalysis.userAnswer !== currentAnalysis.question.correctAnswer ? 'wrong' : ''}}">
+            <text class="option-label">D</text>
+            <text class="option-content">{{currentAnalysis.question.optionD || ''}}</text>
+          </view>
+        </view>
+        
+        <view class="answer-explanation">
+          <view class="answer-info">
+            <text>正确答案: {{currentAnalysis.question.answer}}</text>
+            <text>你的答案: {{currentAnalysis.userAnswer}}</text>
+            <text wx:if="{{currentAnalysis.totalAttempts}}">尝试次数: {{currentAnalysis.totalAttempts}} 次</text>
+            <text wx:if="{{currentAnalysis.errorRate}}">错误率: {{currentAnalysis.errorRate}}%</text>
+          </view>
+        </view>
+      </view>
+      
+      <view class="error-analysis" wx:if="{{currentAnalysis.analysis}}">
+        <view class="analysis-section-title">错误分析</view>
+        <view class="analysis-text">{{currentAnalysis.analysis.analysisText}}</view>
+        
+        <view class="error-pattern" wx:if="{{currentAnalysis.analysis.mostChosenWrongOption}}">
+          <text>您最常选择的错误选项: {{currentAnalysis.analysis.mostChosenWrongOption}}</text>
+        </view>
+      </view>
+      
+      <view class="similar-questions" wx:if="{{currentAnalysis.trainingQuestions && currentAnalysis.trainingQuestions.length > 0}}">
+        <view class="analysis-section-title">推荐训练</view>
+        <view class="training-desc">我们为您准备了 {{currentAnalysis.trainingQuestions.length}} 道相似题目用于训练</view>
+        <view class="start-training-button" bindtap="startTraining">开始训练</view>
+      </view>
+    </scroll-view>
+    
+    <!-- 训练模式界面 -->
+    <view class="training-container" wx:if="{{trainingMode}}">
+      <view class="training-header">
+        <text>训练题 {{currentTrainingIndex + 1}}/{{trainingQuestions.length}}</text>
+        <view class="back-to-analysis" bindtap="backToAnalysis">返回分析</view>
+      </view>
+      
+      <view class="training-question">
+        <view class="question-title">{{trainingQuestions[currentTrainingIndex].question.content}}</view>
+        
+        <view class="options">
+          <view class="option {{trainingAnswer === 'A' ? 'selected' : ''}} {{trainingResult && trainingQuestions[currentTrainingIndex].correctAnswer === 'A' ? 'correct' : ''}} {{trainingResult && trainingAnswer === 'A' && trainingAnswer !== trainingQuestions[currentTrainingIndex].correctAnswer ? 'wrong' : ''}}" 
+            bindtap="selectTrainingAnswer" data-answer="A">
+            <text class="option-label">A</text>
+            <text class="option-content">{{trainingQuestions[currentTrainingIndex].question.optionA || ''}}</text>
+          </view>
+          
+          <view class="option {{trainingAnswer === 'B' ? 'selected' : ''}} {{trainingResult && trainingQuestions[currentTrainingIndex].correctAnswer === 'B' ? 'correct' : ''}} {{trainingResult && trainingAnswer === 'B' && trainingAnswer !== trainingQuestions[currentTrainingIndex].correctAnswer ? 'wrong' : ''}}" 
+            bindtap="selectTrainingAnswer" data-answer="B">
+            <text class="option-label">B</text>
+            <text class="option-content">{{trainingQuestions[currentTrainingIndex].question.optionB || ''}}</text>
+          </view>
+          
+          <view class="option {{trainingAnswer === 'C' ? 'selected' : ''}} {{trainingResult && trainingQuestions[currentTrainingIndex].correctAnswer === 'C' ? 'correct' : ''}} {{trainingResult && trainingAnswer === 'C' && trainingAnswer !== trainingQuestions[currentTrainingIndex].correctAnswer ? 'wrong' : ''}}" 
+            bindtap="selectTrainingAnswer" data-answer="C">
+            <text class="option-label">C</text>
+            <text class="option-content">{{trainingQuestions[currentTrainingIndex].question.optionC || ''}}</text>
+          </view>
+          
+          <view class="option {{trainingAnswer === 'D' ? 'selected' : ''}} {{trainingResult && trainingQuestions[currentTrainingIndex].correctAnswer === 'D' ? 'correct' : ''}} {{trainingResult && trainingAnswer === 'D' && trainingAnswer !== trainingQuestions[currentTrainingIndex].correctAnswer ? 'wrong' : ''}}" 
+            bindtap="selectTrainingAnswer" data-answer="D">
+            <text class="option-label">D</text>
+            <text class="option-content">{{trainingQuestions[currentTrainingIndex].question.optionD || ''}}</text>
+          </view>
+        </view>
+        
+        <view class="training-feedback" wx:if="{{trainingResult}}">
+          <view class="{{trainingResult.isCorrect ? 'correct-feedback' : 'wrong-feedback'}}">
+            {{trainingResult.isCorrect ? '回答正确' : '回答错误'}}
+            <text wx:if="{{!trainingResult.isCorrect}}">正确答案: {{trainingResult.correctAnswer}}</text>
+          </view>
+        </view>
+        
+        <view class="training-actions">
+          <view class="submit-button {{trainingAnswer && !trainingResult ? 'active' : ''}}" bindtap="submitTrainingAnswer" wx:if="{{!trainingResult}}">
+            提交答案
+          </view>
+          <view class="next-button {{trainingResult ? 'active' : ''}}" bindtap="nextTrainingQuestion" wx:if="{{trainingResult}}">
+            {{currentTrainingIndex === trainingQuestions.length - 1 ? '完成训练' : '下一题'}}
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

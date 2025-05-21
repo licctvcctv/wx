@@ -1,0 +1,194 @@
+/* pages/userStats/userStats.wxss */
+.container {
+  padding: 20rpx;
+  background-color: #f6f6f6;
+  min-height: 100vh;
+}
+
+.header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30rpx;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.stats-card {
+  background-color: #fff;
+  border-radius: 10rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+  padding: 20rpx;
+  margin-bottom: 30rpx;
+}
+
+.card-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid #eee;
+  margin-bottom: 20rpx;
+}
+
+.stats-overview {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+  padding: 20rpx 0;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-value {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #4a90e2;
+}
+
+.stat-label {
+  font-size: 26rpx;
+  color: #666;
+  margin-top: 10rpx;
+}
+
+.progress-container {
+  padding: 10rpx 0;
+}
+
+.progress-item {
+  margin-bottom: 20rpx;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10rpx;
+}
+
+.progress-name {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.progress-percentage {
+  font-size: 28rpx;
+  color: #4a90e2;
+}
+
+.progress-bar {
+  height: 16rpx;
+  background-color: #eee;
+  border-radius: 8rpx;
+  overflow: hidden;
+}
+
+.progress-filled {
+  height: 100%;
+  background-color: #4a90e2;
+  border-radius: 8rpx;
+}
+
+.subject-container {
+  padding: 10rpx 0;
+}
+
+.subject-item {
+  padding: 20rpx;
+  border-bottom: 1rpx solid #eee;
+}
+
+.subject-item:last-child {
+  border-bottom: none;
+}
+
+.subject-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.subject-name {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.subject-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 24rpx;
+  color: #666;
+}
+
+.trend-container {
+  padding: 20rpx 0;
+}
+
+.trend-chart {
+  height: 300rpx;
+  padding: 20rpx 0;
+}
+
+.chart-bars {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  height: 250rpx;
+}
+
+.chart-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 60rpx;
+}
+
+.chart-bar-value {
+  width: 40rpx;
+  background-color: #4a90e2;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding-bottom: 5rpx;
+  border-top-left-radius: 5rpx;
+  border-top-right-radius: 5rpx;
+  min-height: 1rpx;
+}
+
+.chart-bar-value text {
+  font-size: 20rpx;
+  color: #fff;
+}
+
+.chart-bar-date {
+  font-size: 20rpx;
+  color: #999;
+  margin-top: 10rpx;
+}
+
+.no-data {
+  text-align: center;
+  padding: 30rpx;
+  color: #999;
+}
+
+.back-btn {
+  width: 90%;
+  height: 80rpx;
+  background-color: #4a90e2;
+  color: white;
+  border-radius: 10rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 40rpx auto;
+  font-size: 30rpx;
+}

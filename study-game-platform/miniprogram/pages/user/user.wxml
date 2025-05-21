@@ -1,0 +1,49 @@
+<view class="container user-container">
+  <view class="user-header">
+    <view class="avatar-container">
+      <image class="avatar" src="/images/default-avatar.png"></image>
+    </view>
+    <view class="user-info">
+      <view class="nickname">{{userInfo.nickname || '未登录用户'}}</view>
+      <view class="username">{{userInfo.username ? '用户名: ' + userInfo.username : '请先登录'}}</view>
+    </view>
+  </view>
+  
+  <view class="menu-list">
+    <view class="menu-item" bindtap="goToMyStats">
+      <view class="menu-item-left">
+        <image class="menu-icon" src="/images/stats.png"></image>
+        <text class="menu-text">我的学习统计</text>
+      </view>
+      <image class="arrow-icon" src="/images/arrow-right.png"></image>
+    </view>
+    
+    <view class="menu-item" bindtap="goToWrongQuestions">
+      <view class="menu-item-left">
+        <image class="menu-icon" src="/images/wrong.png"></image>
+        <text class="menu-text">我的错题本</text>
+      </view>
+      <image class="arrow-icon" src="/images/arrow-right.png"></image>
+    </view>
+    
+    <view class="menu-item" bindtap="goToFeedback">
+      <view class="menu-item-left">
+        <image class="menu-icon" src="/images/feedback.png"></image>
+        <text class="menu-text">意见反馈</text>
+      </view>
+      <image class="arrow-icon" src="/images/arrow-right.png"></image>
+    </view>
+    
+    <view class="menu-item" bindtap="showAbout">
+      <view class="menu-item-left">
+        <image class="menu-icon" src="/images/about.png"></image>
+        <text class="menu-text">关于我们</text>
+      </view>
+      <image class="arrow-icon" src="/images/arrow-right.png"></image>
+    </view>
+  </view>
+  
+  <view class="logout-btn-container" wx:if="{{isLoggedIn}}">
+    <button class="btn-primary logout-btn" bindtap="logout">退出登录</button>
+  </view>
+</view>

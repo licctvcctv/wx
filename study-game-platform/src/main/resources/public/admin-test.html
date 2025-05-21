@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #4e73df;
+        }
+        .info {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #4e73df;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>管理后台测试页面</h1>
+    <p>如果您能看到此页面，说明服务器可以提供静态资源</p>
+    
+    <div class="info">
+        <p>服务器时间: <span id="server-time"></span></p>
+        <p>您可以尝试访问以下链接:</p>
+        <ul style="list-style-type: none; padding: 0;">
+            <li><a href="/admin/login.html" class="btn">管理员登录页面</a></li>
+            <li style="margin-top: 10px;"><a href="/admin-login" class="btn">通过控制器访问登录页</a></li>
+            <li style="margin-top: 10px;"><a href="/api/test" class="btn">测试API接口</a></li>
+        </ul>
+    </div>
+    
+    <script>
+        // 更新服务器时间
+        function updateTime() {
+            document.getElementById('server-time').textContent = new Date().toLocaleString();
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+    </script>
+</body>
+</html>

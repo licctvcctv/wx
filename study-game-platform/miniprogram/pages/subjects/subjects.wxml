@@ -1,0 +1,41 @@
+<view class="container">
+  <view class="header">
+    <view class="welcome">
+      <view class="welcome-text">你好，{{userInfo.nickname || '同学'}}</view>
+      <view class="welcome-tip">今天想学习什么科目呢？</view>
+    </view>
+    <view class="user-avatar">
+      <image wx:if="{{userInfo.avatarUrl}}" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
+      <view wx:else class="avatar-placeholder">{{userInfo.nickname ? userInfo.nickname[0] : '学'}}</view>
+    </view>
+  </view>
+
+  <view class="search-box">
+    <icon type="search" size="16" color="#999"></icon>
+    <input placeholder="搜索学科" bindinput="onSearchInput" confirm-type="search" />
+  </view>
+
+  <view class="subject-list" wx:if="{{subjects.length > 0}}">
+    <block wx:for="{{subjects}}" wx:key="id">
+      <view class="subject-card" bindtap="goToChapters" data-id="{{item.id}}">
+        <image class="subject-icon" src="{{item.iconUrl || '/images/default-subject.png'}}" mode="aspectFill"></image>
+        <view class="subject-info">
+          <view class="subject-name">{{item.name}}</view>
+          <view class="subject-desc">{{item.description || '开启学习之旅'}}</view>
+          <view class="subject-meta">
+            <view class="tag tag-primary">{{item.difficultyText || '入门'}}</view>
+            <view class="progress-info">已学 {{item.progress || '0%'}}</view>
+          </view>
+        </view>
+        <view class="subject-arrow">
+          <image src="/images/arrow-right.png" mode="aspectFit"></image>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <view class="empty-tip" wx:else>
+    <image src="/images/empty.png" mode="aspectFit"></image>
+    <view>{{loading ? '正在加载...' : '暂无学科信息'}}</view>
+  </view>
+</view>

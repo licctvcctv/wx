@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员登录 - 学习游戏平台</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .login-container {
+            width: 100%;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .login-title {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .btn-login {
+            width: 100%;
+            padding: 10px;
+            background-color: #4e73df;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-login:hover {
+            background-color: #2e59d9;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h3 class="login-title">管理员登录</h3>
+        <div id="alert-container"></div>
+        <form id="login-form">
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" class="form-control" id="username" placeholder="请输入用户名" required>
+            </div>
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" class="form-control" id="password" placeholder="请输入密码" required>
+            </div>
+            <button type="submit" class="btn-login" id="login-btn">登录</button>
+        </form>
+        <div style="margin-top: 20px;">
+            <a href="#" id="init-admin-btn">初始化管理员账户</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const baseUrl = window.location.protocol + '//' + window.location.host;
+            
+            // 登录表单提交
+            document.getElementById('login-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                const loginBtn = document.getElementById('login-btn');
+                
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = '正在登录...';
+                
+                fetch(baseUrl + '/api/admin/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.code === 200) {
+                        // 登录成功，保存token并跳转到管理主页
+                        localStorage.setItem('adminToken', data.data.token);
+                        // 修正跳转路径 - 从index.html改为admin/index.html
+                        window.location.href = '/admin/index.html';
+                    } else {
+                        // 登录失败，显示错误消息
+                        showAlert('danger', data.message || '登录失败，请检查用户名和密码');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('danger', '服务器错误，请稍后再试');
+                })
+                .finally(() => {
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = '登录';
+                });
+            });
+            
+            // 初始化管理员账户
+            document.getElementById('init-admin-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                if (!confirm('确定要初始化管理员账户吗？初始账户: admin/admin123')) {
+                    return;
+                }
+                
+                fetch(baseUrl + '/api/admin/auth/init', {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.code === 200) {
+                        showAlert('success', '初始化管理员账户成功，请使用 admin/admin123 登录');
+                    } else {
+                        showAlert('danger', data.message || '初始化失败');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('danger', '服务器错误，请稍后再试');
+                });
+            });
+            
+            // 显示警告信息
+            function showAlert(type, message) {
+                const alertContainer = document.getElementById('alert-container');
+                alertContainer.innerHTML = `
+                    <div style="padding: 10px; margin-bottom: 15px; border-radius: 4px; 
+                                background-color: ${type === 'success' ? '#d4edda' : '#f8d7da'}; 
+                                color: ${type === 'success' ? '#155724' : '#721c24'};">
+                        ${message}
+                    </div>
+                `;
+                
+                // 5秒后自动关闭
+                setTimeout(() => {
+                    alertContainer.innerHTML = '';
+                }, 5000);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<view class="container">
+  <view class="chapter-header" wx:if="{{chapter}}">
+    <view class="chapter-info">
+      <view class="chapter-name">{{chapter.name}}</view>
+      <view class="chapter-desc">{{chapter.description || '挑战不同难度的关卡'}}</view>
+    </view>
+    <view class="nav-back" bindtap="goBack">
+      <image src="/images/back.png" mode="aspectFit"></image>
+    </view>
+  </view>
+
+  <view class="level-list" wx:if="{{levels.length > 0}}">
+    <block wx:for="{{levels}}" wx:key="id">
+      <view class="level-card {{item.isLocked ? 'level-locked' : ''}}" bindtap="{{!item.isLocked ? 'startGame' : 'showLockedTip'}}" data-id="{{item.id}}">
+        <view class="level-badge">
+          <view class="level-number">{{index + 1}}</view>
+        </view>
+        <view class="level-info">
+          <view class="level-title">
+            <view class="level-name">{{item.name}}</view>
+            <view class="level-difficulty">
+              <block wx:for="{{item.difficultyLevel}}" wx:key="*this" wx:for-item="star">
+                <image src="/images/star.png" mode="aspectFit" class="star-icon"></image>
+              </block>
+            </view>
+          </view>
+          <view class="level-desc">{{item.description || '完成关卡获得积分'}}</view>
+          <view class="level-meta">
+            <view class="level-questions">题目: {{item.totalQuestions}}题</view>
+            <!-- <view class="level-score">分值: {{item.baseScore}}分/题</view> -->
+          </view>
+          <view class="level-status">
+            <view class="status-text {{item.statusClass}}">{{item.statusText}}</view>
+            <image wx:if="{{item.isLocked}}" src="/images/lock.png" mode="aspectFit" class="lock-icon"></image>
+          </view>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <view class="empty-tip" wx:else>
+    <image src="/images/empty.png" mode="aspectFit"></image>
+    <view>{{loading ? '正在加载...' : '暂无关卡信息'}}</view>
+  </view>
+</view>

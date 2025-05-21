@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理 - 学习游戏平台</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .header {
+            background-color: #4e73df;
+            color: white;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            border: 1px solid #e3e6f0;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            padding: 20px;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+        .card-header {
+            font-weight: bold;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #e3e6f0;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-menu {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .nav-item {
+            background-color: #4e73df;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .nav-item:hover {
+            background-color: #2e59d9;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background-color: #4e73df;
+            color: white;
+        }
+        .btn-success {
+            background-color: #1cc88a;
+            color: white;
+        }
+        .btn-warning {
+            background-color: #f6c23e;
+            color: white;
+        }
+        .btn-danger {
+            background-color: #e74a3b;
+            color: white;
+        }
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .table th, .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e3e6f0;
+        }
+        .table th {
+            background-color: #f8f9fc;
+            font-weight: bold;
+        }
+        .table tr:hover {
+            background-color: #f8f9fc;
+        }
+        .search-box {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .search-box input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #d1d3e2;
+            border-radius: 4px 0 0 4px;
+        }
+        .search-box button {
+            border-radius: 0 4px 4px 0;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .badge-active {
+            background-color: #1cc88a;
+            color: white;
+        }
+        .badge-inactive {
+            background-color: #858796;
+            color: white;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 5px;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: black;
+        }
+        .pagination {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            justify-content: center;
+        }
+        .pagination li {
+            margin: 0 5px;
+        }
+        .pagination a {
+            display: block;
+            padding: 8px 12px;
+            text-decoration: none;
+            background-color: #f8f9fc;
+            color: #4e73df;
+            border-radius: 4px;
+        }
+        .pagination a:hover {
+            background-color: #4e73df;
+            color: white;
+        }
+        .pagination a.active {
+            background-color: #4e73df;
+            color: white;
+        }
+        .user-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .user-info-item {
+            margin-bottom: 15px;
+        }
+        .user-info-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>学习游戏平台 - 用户管理</h1>
+        </div>
+        
+        <div class="nav-menu">
+            <a href="/admin/index.html" class="nav-item">首页</a>
+            <a href="subjects.html" class="nav-item">学科管理</a>
+            <a href="chapters.html" class="nav-item">章节管理</a>
+            <a href="levels.html" class="nav-item">关卡管理</a>
+            <a href="questions.html" class="nav-item">题目管理</a>
+            <a href="users.html" class="nav-item">用户管理</a>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3>用户列表</h3>
+            </div>
+            
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="搜索用户名或昵称...">
+                <button class="btn btn-primary" id="search-btn">搜索</button>
+            </div>
+            
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>用户名</th>
+                            <th>昵称</th>
+                            <th>注册时间</th>
+                            <th>最后登录</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-body">
+                        <!-- 用户列表将通过JavaScript动态生成 -->
+                    </tbody>
+                </table>
+                
+                <ul class="pagination" id="pagination">
+                    <!-- 分页按钮将通过JavaScript动态生成 -->
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 用户详情模态框 -->
+    <div id="user-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>用户详情</h3>
+            
+            <div id="user-details" class="user-details">
+                <!-- 用户详情将通过JavaScript动态生成 -->
+            </div>
+            
+            <div style="margin-top: 20px; text-align: center;">
+                <button class="btn btn-primary" id="close-modal-btn">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取当前登录管理员信息
+            const adminToken = localStorage.getItem('adminToken');
+            if (!adminToken) {
+                // 未登录，跳转到登录页
+                window.location.href = '/admin/login.html';
+            }
+            
+            // 后端API基础URL
+            const baseUrl = '';  // 在同一域名下不需要指定基础URL
+            
+            // 分页设置
+            let currentPage = 1;
+            const usersPerPage = 10;
+            let totalPages = 1;
+            let users = [];
+            
+            // DOM元素
+            const searchInput = document.getElementById('search-input');
+            const searchBtn = document.getElementById('search-btn');
+            const usersBody = document.getElementById('users-body');
+            const pagination = document.getElementById('pagination');
+            const userModal = document.getElementById('user-modal');
+            const userDetails = document.getElementById('user-details');
+            
+            // 搜索按钮点击事件
+            searchBtn.addEventListener('click', function() {
+                currentPage = 1;
+                loadUsers();
+            });
+            
+            // 模态框关闭按钮
+            document.querySelector('.close').addEventListener('click', function() {
+                userModal.style.display = 'none';
+            });
+            
+            document.getElementById('close-modal-btn').addEventListener('click', function() {
+                userModal.style.display = 'none';
+            });
+            
+            // 点击模态框外部关闭
+            window.addEventListener('click', function(event) {
+                if (event.target === userModal) {
+                    userModal.style.display = 'none';
+                }
+            });
+            
+            // 搜索框回车事件
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    currentPage = 1;
+                    loadUsers();
+                }
+            });
+            
+            // 初始化页面
+            loadUsers();
+            
+            // 加载用户列表
+            function loadUsers() {
+                // 应用搜索条件
+                const searchText = searchInput.value.trim();
+                
+                // 构建API请求URL
+                let url = `/api/admin/users?page=${currentPage - 1}&size=${usersPerPage}`;
+                
+                if (searchText) {
+                    url += `&keyword=${encodeURIComponent(searchText)}`;
+                }
+                
+                // 调用API获取用户数据
+                fetch(url, {
+                    headers: {
+                        'Authorization': 'Bearer ' + adminToken
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('获取用户数据失败');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.code === 200) {
+                        users = data.data.content;
+                        totalPages = data.data.totalPages;
+                        displayUsers();
+                        updatePagination();
+                    } else {
+                        alert('获取用户数据失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading users:', error);
+                    alert('获取用户数据失败，请稍后再试');
+                });
+            }
+            
+            // 显示用户列表
+            function displayUsers() {
+                // 清空现有内容
+                usersBody.innerHTML = '';
+                
+                // 如果没有数据
+                if (users.length === 0) {
+                    const emptyRow = document.createElement('tr');
+                    emptyRow.innerHTML = '<td colspan="7" style="text-align: center;">没有找到匹配的用户</td>';
+                    usersBody.appendChild(emptyRow);
+                    return;
+                }
+                
+                // 遍历并显示每个用户
+                users.forEach(user => {
+                    const row = document.createElement('tr');
+                    
+                    // 格式化状态显示
+                    const statusBadge = user.status === 1 
+                        ? '<span class="status-badge badge-active">活跃</span>' 
+                        : '<span class="status-badge badge-inactive">未活跃</span>';
+                    
+                    // 格式化日期
+                    const registerTime = formatDateTime(user.createTime);
+                    const lastLoginTime = formatDateTime(user.lastLoginTime);
+                    
+                    row.innerHTML = `
+                        <td>${user.id}</td>
+                        <td>${user.username}</td>
+                        <td>${user.nickname || '-'}</td>
+                        <td>${registerTime}</td>
+                        <td>${lastLoginTime}</td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm view-btn" data-id="${user.id}">查看</button>
+                            <button class="btn btn-${user.status === 1 ? 'warning' : 'success'} btn-sm status-btn" data-id="${user.id}" data-status="${user.status}">
+                                ${user.status === 1 ? '禁用' : '启用'}
+                            </button>
+                        </td>
+                    `;
+                    
+                    usersBody.appendChild(row);
+                });
+                
+                // 添加查看按钮事件
+                document.querySelectorAll('.view-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = this.getAttribute('data-id');
+                        viewUser(id);
+                    });
+                });
+                
+                // 添加状态切换按钮事件
+                document.querySelectorAll('.status-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = this.getAttribute('data-id');
+                        const currentStatus = parseInt(this.getAttribute('data-status'));
+                        const newStatus = currentStatus === 1 ? 'disable' : 'enable';
+                        const action = currentStatus === 1 ? '禁用' : '启用';
+                        
+                        if (confirm(`确定要${action}该用户吗？`)) {
+                            toggleUserStatus(id, newStatus);
+                        }
+                    });
+                });
+            }
+            
+            // 更新分页控件
+            function updatePagination() {
+                pagination.innerHTML = '';
+                
+                // 如果总页数小于等于1，不显示分页
+                if (totalPages <= 1) return;
+                
+                // 添加"上一页"按钮
+                const prevItem = document.createElement('li');
+                const prevLink = document.createElement('a');
+                prevLink.href = '#';
+                prevLink.textContent = '上一页';
+                if (currentPage === 1) {
+                    prevLink.style.opacity = '0.5';
+                    prevLink.style.pointerEvents = 'none';
+                } else {
+                    prevLink.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        if (currentPage > 1) {
+                            currentPage--;
+                            loadUsers();
+                        }
+                    });
+                }
+                prevItem.appendChild(prevLink);
+                pagination.appendChild(prevItem);
+                
+                // 添加页码按钮
+                const maxPagesToShow = 5;
+                let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+                let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+                
+                if (endPage - startPage + 1 < maxPagesToShow) {
+                    startPage = Math.max(1, endPage - maxPagesToShow + 1);
+                }
+                
+                for (let i = startPage; i <= endPage; i++) {
+                    const pageItem = document.createElement('li');
+                    const pageLink = document.createElement('a');
+                    pageLink.href = '#';
+                    pageLink.textContent = i;
+                    
+                    if (i === currentPage) {
+                        pageLink.classList.add('active');
+                    } else {
+                        pageLink.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            currentPage = i;
+                            loadUsers();
+                        });
+                    }
+                    
+                    pageItem.appendChild(pageLink);
+                    pagination.appendChild(pageItem);
+                }
+                
+                // 添加"下一页"按钮
+                const nextItem = document.createElement('li');
+                const nextLink = document.createElement('a');
+                nextLink.href = '#';
+                nextLink.textContent = '下一页';
+                if (currentPage === totalPages) {
+                    nextLink.style.opacity = '0.5';
+                    nextLink.style.pointerEvents = 'none';
+                } else {
+                    nextLink.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        if (currentPage < totalPages) {
+                            currentPage++;
+                            loadUsers();
+                        }
+                    });
+                }
+                nextItem.appendChild(nextLink);
+                pagination.appendChild(nextItem);
+            }
+            
+            // 查看用户详情
+            function viewUser(id) {
+                // 查找选中的用户
+                const user = users.find(u => u.id == id);
+                if (!user) return;
+                
+                // 格式化日期
+                const registerTime = formatDateTime(user.createTime);
+                const lastLoginTime = formatDateTime(user.lastLoginTime);
+                
+                // 构建详情HTML
+                userDetails.innerHTML = `
+                    <div class="user-info-item">
+                        <div class="user-info-label">用户ID</div>
+                        <div>${user.id}</div>
+                    </div>
+                    <div class="user-info-item">
+                        <div class="user-info-label">用户名</div>
+                        <div>${user.username}</div>
+                    </div>
+                    <div class="user-info-item">
+                        <div class="user-info-label">昵称</div>
+                        <div>${user.nickname || '-'}</div>
+                    </div>
+                    <div class="user-info-item">
+                        <div class="user-info-label">状态</div>
+                        <div>${user.status === 1 ? '<span class="status-badge badge-active">活跃</span>' : '<span class="status-badge badge-inactive">未活跃</span>'}</div>
+                    </div>
+                    <div class="user-info-item">
+                        <div class="user-info-label">注册时间</div>
+                        <div>${registerTime}</div>
+                    </div>
+                    <div class="user-info-item">
+                        <div class="user-info-label">最后登录时间</div>
+                        <div>${lastLoginTime}</div>
+                    </div>
+                    <div class="user-info-item">
+                        <div class="user-info-label">总分数</div>
+                        <div>${user.totalScore || 0}</div>
+                    </div>
+                `;
+                
+                // 显示模态框
+                userModal.style.display = 'block';
+            }
+            
+            // 切换用户状态
+            function toggleUserStatus(id, newStatus) {
+                // 调用API更新用户状态
+                fetch(`/api/admin/users/${id}/status?status=${newStatus}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + adminToken
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('更新用户状态失败');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.code === 200) {
+                        alert('操作成功');
+                        loadUsers(); // 重新加载用户列表
+                    } else {
+                        alert('操作失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating user status:', error);
+                    alert('操作失败，请稍后再试');
+                });
+            }
+            
+            // 格式化日期时间
+            function formatDateTime(dateTimeStr) {
+                if (!dateTimeStr) return '-';
+                
+                try {
+                    const date = new Date(dateTimeStr);
+                    return date.toLocaleString('zh-CN', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: false
+                    });
+                } catch (e) {
+                    return dateTimeStr;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

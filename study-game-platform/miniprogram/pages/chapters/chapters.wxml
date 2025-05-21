@@ -1,0 +1,41 @@
+<view class="container">
+  <view class="subject-header" wx:if="{{subject}}">
+    <view class="subject-info">
+      <view class="subject-name">{{subject.name}}</view>
+      <view class="subject-desc">{{subject.description || '开启学习之旅'}}</view>
+    </view>
+    <view class="nav-back" bindtap="goBack">
+      <image src="/images/back.png" mode="aspectFit"></image>
+    </view>
+  </view>
+
+  <view class="chapter-list" wx:if="{{chapters.length > 0}}">
+    <block wx:for="{{chapters}}" wx:key="id">
+      <view class="chapter-card" bindtap="goToLevels" data-id="{{item.id}}">
+        <view class="chapter-info">
+          <view class="chapter-title">
+            <view class="chapter-name">{{item.name}}</view>
+            <view class="chapter-difficulty">
+              <block wx:for="{{item.difficultyLevel}}" wx:key="*this" wx:for-item="star">
+                <image src="/images/star.png" mode="aspectFit" class="star-icon"></image>
+              </block>
+            </view>
+          </view>
+          <view class="chapter-desc">{{item.description || '本章节包含多个学习关卡'}}</view>
+          <view class="progress-bar">
+            <view class="progress-inner" style="width: {{item.progress || '0%'}};"></view>
+          </view>
+          <view class="progress-text">学习进度：{{item.progress || '0%'}}</view>
+        </view>
+        <view class="chapter-arrow">
+          <image src="/images/arrow-right.png" mode="aspectFit"></image>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <view class="empty-tip" wx:else>
+    <image src="/images/empty.png" mode="aspectFit"></image>
+    <view>{{loading ? '正在加载...' : '暂无章节信息'}}</view>
+  </view>
+</view>

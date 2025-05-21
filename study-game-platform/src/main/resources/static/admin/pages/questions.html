@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>题目管理 - 学习游戏平台</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .header {
+            background-color: #4e73df;
+            color: white;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            border: 1px solid #e3e6f0;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            padding: 20px;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+        .card-header {
+            font-weight: bold;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #e3e6f0;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-menu {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .nav-item {
+            background-color: #4e73df;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .nav-item:hover {
+            background-color: #2e59d9;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background-color: #4e73df;
+            color: white;
+        }
+        .btn-success {
+            background-color: #1cc88a;
+            color: white;
+        }
+        .btn-warning {
+            background-color: #f6c23e;
+            color: white;
+        }
+        .btn-danger {
+            background-color: #e74a3b;
+            color: white;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .table th, .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e3e6f0;
+        }
+        .table th {
+            background-color: #f8f9fc;
+            font-weight: bold;
+        }
+        .table tr:hover {
+            background-color: #f8f9fc;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #d1d3e2;
+            border-radius: 4px;
+        }
+        .form-select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #d1d3e2;
+            border-radius: 4px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 5px;
+            width: 80%;
+            max-width: 600px;
+            max-height: 80vh; /* 限制最大高度为视口高度的80% */
+            overflow-y: auto; /* 添加垂直滚动条 */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: black;
+        }
+        .search-box {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .search-box input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #d1d3e2;
+            border-radius: 4px 0 0 4px;
+        }
+        .search-box button {
+            border-radius: 0 4px 4px 0;
+        }
+        .option-container {
+            margin-top: 10px;
+        }
+        .pagination {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            justify-content: center;
+        }
+        .pagination li {
+            margin: 0 5px;
+        }
+        .pagination a {
+            display: block;
+            padding: 8px 12px;
+            text-decoration: none;
+            background-color: #f8f9fc;
+            color: #4e73df;
+            border-radius: 4px;
+        }
+        .pagination a.active {
+            background-color: #4e73df;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>学习游戏平台 - 题目管理</h1>
+            <div>当前登录账号: <span id="current-admin">admin</span> | <a href="/admin/login.html" style="color: white;">退出登录</a></div>
+        </div>
+        
+        <div class="nav-menu">
+            <a href="/admin/index.html" class="nav-item">控制台</a>
+            <a href="subjects.html" class="nav-item">学科管理</a>
+            <a href="chapters.html" class="nav-item">章节管理</a>
+            <a href="levels.html" class="nav-item">关卡管理</a>
+            <a href="questions.html" class="nav-item">题目管理</a>
+            <a href="users.html" class="nav-item">用户管理</a>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3>题目列表</h3>
+                <button class="btn btn-primary" id="add-question-btn">添加题目</button>
+            </div>
+            
+            <div class="search-box">
+                <select id="level-filter" class="form-select" style="flex: 0.3; border-radius: 4px 0 0 4px;">
+                    <option value="">全部关卡</option>
+                </select>
+                <select id="type-filter" class="form-select" style="flex: 0.3; border-radius: 0;">
+                    <option value="">全部题型</option>
+                    <option value="1">单选题</option>
+                    <option value="2">多选题</option>
+                    <option value="3">判断题</option>
+                    <option value="4">填空题</option>
+                </select>
+                <input type="text" id="search-input" placeholder="搜索题目内容...">
+                <button class="btn btn-primary" id="search-btn">搜索</button>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table" id="questions-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th width="30%">题目内容</th>
+                            <th>题型</th>
+                            <th>所属关卡</th>
+                            <th>分值</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="questions-body">
+                        <!-- 题目数据将通过JavaScript动态加载 -->
+                    </tbody>
+                </table>
+                
+                <ul class="pagination" id="pagination">
+                    <!-- 分页按钮将通过JavaScript动态生成 -->
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 添加/编辑题目的模态框 -->
+    <div id="question-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3 id="modal-title">添加题目</h3>
+            
+            <form id="question-form">
+                <input type="hidden" id="question-id">
+                
+                <div class="form-group">
+                    <label for="question-level">所属关卡</label>
+                    <select id="question-level" class="form-select" required>
+                        <!-- 关卡选项将通过JavaScript动态加载 -->
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="question-type">题目类型</label>
+                    <select id="question-type" class="form-select" required>
+                        <option value="1">单选题</option>
+                        <option value="2">多选题</option>
+                        <option value="3">判断题</option>
+                        <option value="4">填空题</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="question-content">题目内容</label>
+                    <textarea id="question-content" class="form-control" rows="3" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="question-score">分值</label>
+                    <input type="number" id="question-score" class="form-control" min="1" value="1" required>
+                </div>
+                
+                <div id="options-container">
+                    <!-- 选项将根据题目类型动态生成 -->
+                </div>
+                
+                <div class="form-group" id="answer-container">
+                    <!-- 答案输入将根据题目类型动态生成 -->
+                </div>
+                
+                <div class="form-group">
+                    <label for="question-explanation">解析（可选）</label>
+                    <textarea id="question-explanation" class="form-control" rows="2"></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">保存</button>
+                <button type="button" class="btn btn-danger" id="cancel-btn">取消</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取当前登录管理员信息
+            const adminToken = localStorage.getItem('adminToken');
+            if (!adminToken) {
+                // 未登录，跳转到登录页
+                window.location.href = '/admin/login.html';
+                return;
+            }
+            
+            // 页面常量和变量
+            const baseUrl = window.location.protocol + '//' + window.location.host;
+            const questionsPerPage = 10;
+            let currentPage = 1;
+            let totalPages = 1;
+            let questions = [];
+            let levels = [];
+            
+            // DOM元素
+            const questionsBody = document.getElementById('questions-body');
+            const pagination = document.getElementById('pagination');
+            const searchInput = document.getElementById('search-input');
+            const searchBtn = document.getElementById('search-btn');
+            const levelFilter = document.getElementById('level-filter');
+            const typeFilter = document.getElementById('type-filter');
+            const questionModal = document.getElementById('question-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const questionForm = document.getElementById('question-form');
+            const questionId = document.getElementById('question-id');
+            const questionLevel = document.getElementById('question-level');
+            const questionType = document.getElementById('question-type');
+            const optionsContainer = document.getElementById('options-container');
+            const answerContainer = document.getElementById('answer-container');
+            
+            // 添加题目按钮点击事件
+            document.getElementById('add-question-btn').addEventListener('click', function() {
+                openAddQuestionModal();
+            });
+            
+            // 关闭模态框
+            document.getElementsByClassName('close')[0].addEventListener('click', function() {
+                questionModal.style.display = 'none';
+            });
+            
+            // 取消按钮点击事件
+            document.getElementById('cancel-btn').addEventListener('click', function() {
+                questionModal.style.display = 'none';
+            });
+            
+            // 点击模态框外部关闭
+            window.addEventListener('click', function(event) {
+                if (event.target === questionModal) {
+                    questionModal.style.display = 'none';
+                }
+            });
+            
+            // 题目类型变化时更新选项和答案输入
+            questionType.addEventListener('change', function() {
+                updateOptionsAndAnswer();
+            });
+            
+            // 搜索按钮点击事件
+            searchBtn.addEventListener('click', function() {
+                currentPage = 1;
+                loadQuestions();
+            });
+            
+            // 级联筛选器变化时重新加载数据
+            levelFilter.addEventListener('change', function() {
+                currentPage = 1;
+                loadQuestions();
+            });
+            
+            typeFilter.addEventListener('change', function() {
+                currentPage = 1;
+                loadQuestions();
+            });
+            
+            // 表单提交事件
+            questionForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveQuestion();
+            });
+            
+            // 初始化页面
+            loadLevels();
+            loadQuestions();
+            
+            // 加载关卡列表
+            function loadLevels() {
+                // 调用API获取关卡数据
+                fetch('/api/admin/levels', {
+                    headers: {
+                        'Authorization': 'Bearer ' + adminToken
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('获取关卡数据失败');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.code === 200) {
+                        levels = data.data;
+                        populateLevelSelector();
+                    } else {
+                        alert('获取关卡数据失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading levels:', error);
+                    alert('获取关卡数据失败，请稍后再试');
+                });
+            }
+            
+            // 填充关卡选择器
+            function populateLevelSelector() {
+                // 清空现有选项
+                levelFilter.innerHTML = '<option value="">全部关卡</option>';
+                questionLevel.innerHTML = '';
+                
+                // 添加关卡选项
+                levels.forEach(level => {
+                    // 筛选器选项
+                    const filterOption = document.createElement('option');
+                    filterOption.value = level.id;
+                    filterOption.textContent = level.name;
+                    levelFilter.appendChild(filterOption);
+                    
+                    // 表单选项
+                    const formOption = document.createElement('option');
+                    formOption.value = level.id;
+                    formOption.textContent = level.name;
+                    questionLevel.appendChild(formOption);
+                });
+            }
+            
+            // 加载题目列表
+            function loadQuestions() {
+                // 应用筛选器
+                const levelId = levelFilter.value;
+                const type = typeFilter.value;
+                const searchText = searchInput.value.trim();
+                
+                // 构建API请求URL
+                let url = `/api/admin/questions?page=${currentPage - 1}&size=${questionsPerPage}`;
+                
+                if (levelId) url += `&levelId=${levelId}`;
+                if (type) url += `&type=${type}`;
+                if (searchText) url += `&content=${encodeURIComponent(searchText)}`;
+                
+                // 调用API获取题目数据
+                fetch(url, {
+                    headers: {
+                        'Authorization': 'Bearer ' + adminToken
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('获取题目数据失败');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.code === 200) {
+                        questions = data.data.content;
+                        totalPages = data.data.totalPages;
+                        displayQuestions();
+                        updatePagination();
+                    } else {
+                        alert('获取题目数据失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading questions:', error);
+                    alert('获取题目数据失败，请稍后再试');
+                });
+            }
+            
+            // 显示题目列表
+            function displayQuestions() {
+                // 清空列表
+                questionsBody.innerHTML = '';
+                
+                // 如果没有数据，显示提示信息
+                if (!questions || questions.length === 0) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td colspan="6" style="text-align: center;">暂无数据</td>`;
+                    questionsBody.appendChild(row);
+                    return;
+                }
+                
+                // 显示当前页的题目
+                questions.forEach(question => {
+                    const row = document.createElement('tr');
+                    
+                    // 格式化题型显示
+                    let typeText = '';
+                    switch (question.type) {
+                        case 1: typeText = '单选题'; break;
+                        case 2: typeText = '多选题'; break;
+                        case 3: typeText = '判断题'; break;
+                        case 4: typeText = '填空题'; break;
+                        default: typeText = question.type;
+                    }
+                    
+                    // 获取关卡名称
+                    let levelName = '未知关卡';
+                    if (question.levelName) {
+                        levelName = question.levelName;
+                    } else if (question.levelId) {
+                        const level = levels.find(l => l.id == question.levelId);
+                        if (level) {
+                            levelName = level.name;
+                        }
+                    }
+                    
+                    row.innerHTML = `
+                        <td>${question.id}</td>
+                        <td>${question.content}</td>
+                        <td>${typeText}</td>
+                        <td>${levelName}</td>
+                        <td>${question.score}</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm edit-btn" data-id="${question.id}">编辑</button>
+                            <button class="btn btn-danger btn-sm delete-btn" data-id="${question.id}">删除</button>
+                            <button class="btn btn-primary btn-sm view-btn" data-id="${question.id}">查看</button>
+                        </td>
+                    `;
+                    
+                    questionsBody.appendChild(row);
+                });
+                
+                // 添加编辑按钮事件
+                document.querySelectorAll('.edit-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = this.getAttribute('data-id');
+                        openEditQuestionModal(id);
+                    });
+                });
+                
+                // 添加删除按钮事件
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = this.getAttribute('data-id');
+                        deleteQuestion(id);
+                    });
+                });
+                
+                // 添加查看按钮事件
+                document.querySelectorAll('.view-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = this.getAttribute('data-id');
+                        viewQuestion(id);
+                    });
+                });
+            }
+            
+            // 更新分页控件
+            function updatePagination() {
+                console.log('更新分页: 当前页码=', currentPage, '总页数=', totalPages);
+                pagination.innerHTML = '';
+                
+                // 如果总页数小于等于1，不显示分页
+                if (totalPages <= 1) return;
+                
+                // 添加"上一页"按钮
+                const prevItem = document.createElement('li');
+                const prevLink = document.createElement('a');
+                prevLink.href = 'javascript:void(0);';
+                prevLink.textContent = '上一页';
+                prevLink.style.cursor = 'pointer';
+                
+                if (currentPage === 1) {
+                    prevLink.style.opacity = '0.5';
+                    prevLink.style.pointerEvents = 'none';
+                } else {
+                    prevLink.onclick = function() {
+                        console.log('点击上一页');
+                        if (currentPage > 1) {
+                            currentPage--;
+                            loadQuestions(); // 直接重新加载题目
+                        }
+                        return false;
+                    };
+                }
+                
+                prevItem.appendChild(prevLink);
+                pagination.appendChild(prevItem);
+                
+                // 添加页码按钮
+                const maxPagesToShow = 5;
+                let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+                let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+                
+                if (endPage - startPage + 1 < maxPagesToShow) {
+                    startPage = Math.max(1, endPage - maxPagesToShow + 1);
+                }
+                
+                for (let i = startPage; i <= endPage; i++) {
+                    const pageItem = document.createElement('li');
+                    const pageLink = document.createElement('a');
+                    pageLink.href = 'javascript:void(0);';
+                    pageLink.textContent = i;
+                    pageLink.style.cursor = 'pointer';
+                    
+                    if (i === currentPage) {
+                        pageLink.classList.add('active');
+                        pageLink.style.backgroundColor = '#4CAF50';
+                        pageLink.style.color = 'white';
+                    } else {
+                        pageLink.onclick = function() {
+                            console.log('点击页码', i);
+                            currentPage = i;
+                            loadQuestions(); // 直接重新加载题目
+                            return false;
+                        };
+                    }
+                    
+                    pageItem.appendChild(pageLink);
+                    pagination.appendChild(pageItem);
+                }
+                
+                // 添加"下一页"按钮
+                const nextItem = document.createElement('li');
+                const nextLink = document.createElement('a');
+                nextLink.href = 'javascript:void(0);';
+                nextLink.textContent = '下一页';
+                nextLink.style.cursor = 'pointer';
+                
+                if (currentPage === totalPages) {
+                    nextLink.style.opacity = '0.5';
+                    nextLink.style.pointerEvents = 'none';
+                } else {
+                    nextLink.onclick = function() {
+                        console.log('点击下一页');
+                        if (currentPage < totalPages) {
+                            currentPage++;
+                            loadQuestions(); // 直接重新加载题目
+                        }
+                        return false;
+                    };
+                }
+                
+                nextItem.appendChild(nextLink);
+                pagination.appendChild(nextItem);
+            }
+            
+            // 打开添加题目模态框
+            function openAddQuestionModal() {
+                // 重置表单
+                questionForm.reset();
+                questionId.value = '';
+                modalTitle.textContent = '添加题目';
+                
+                // 更新选项和答案输入
+                updateOptionsAndAnswer();
+                
+                // 显示模态框
+                questionModal.style.display = 'block';
+            }
+            
+            // 打开编辑题目模态框
+            function openEditQuestionModal(id) {
+                // 查找选中的题目
+                const question = questions.find(q => q.id == id);
+                if (!question) return;
+                
+                // 填充表单数据
+                questionId.value = question.id;
+                questionLevel.value = question.levelId;
+                questionType.value = question.type;
+                document.getElementById('question-content').value = question.content;
+                document.getElementById('question-score').value = question.score;
+                
+                // 更新选项和答案输入
+                updateOptionsAndAnswer();
+                
+                // 根据题目类型填充选项和答案
+                setTimeout(() => {
+                    switch (question.type) {
+                        case 1:
+                        case 2:
+                            // 填充选项
+                            if (question.options && question.options.length > 0) {
+                                const optionInputs = document.querySelectorAll('.option-input');
+                                question.options.forEach((option, index) => {
+                                    if (index < optionInputs.length) {
+                                        optionInputs[index].value = option;
+                                    }
+                                });
+                            }
+                            
+                            // 填充答案
+                            document.getElementById('question-answer').value = question.answer;
+                            break;
+                            
+                        case 3:
+                            document.getElementById('question-answer-true').checked = question.answer === 'TRUE';
+                            document.getElementById('question-answer-false').checked = question.answer === 'FALSE';
+                            break;
+                            
+                        case 4:
+                            document.getElementById('question-answer').value = question.answer;
+                            break;
+                    }
+                }, 100);
+                
+                // 填充解析（如果有）
+                if (question.explanation) {
+                    document.getElementById('question-explanation').value = question.explanation;
+                }
+                
+                // 更新标题
+                modalTitle.textContent = '编辑题目';
+                
+                // 显示模态框
+                questionModal.style.display = 'block';
+            }
+            
+            // 根据题目类型更新选项和答案输入
+            function updateOptionsAndAnswer() {
+                const type = questionType.value;
+                
+                // 清空容器
+                optionsContainer.innerHTML = '';
+                answerContainer.innerHTML = '';
+                
+                // 根据题目类型创建不同的输入控件
+                switch (type) {
+                    case '1':
+                    case '2':
+                        // 添加选项输入
+                        optionsContainer.innerHTML = `
+                            <div class="form-group">
+                                <label>选项</label>
+                                <div class="option-container">
+                                    <input type="text" class="form-control option-input" placeholder="选项A" required>
+                                </div>
+                                <div class="option-container">
+                                    <input type="text" class="form-control option-input" placeholder="选项B" required>
+                                </div>
+                                <div class="option-container">
+                                    <input type="text" class="form-control option-input" placeholder="选项C" required>
+                                </div>
+                                <div class="option-container">
+                                    <input type="text" class="form-control option-input" placeholder="选项D" required>
+                                </div>
+                            </div>
+                        `;
+                        
+                        // 添加答案输入
+                        answerContainer.innerHTML = `
+                            <label for="question-answer">正确答案 ${type === '2' ? '(多选用逗号分隔，如: A,B,C)' : ''}</label>
+                            <input type="text" id="question-answer" class="form-control" placeholder="${type === '1' ? '输入选项字母，如: A' : '输入选项字母，如: A,B,C'}" required>
+                        `;
+                        break;
+                        
+                    case '3':
+                        // 添加判断题答案选择
+                        answerContainer.innerHTML = `
+                            <label>正确答案</label>
+                            <div>
+                                <label style="font-weight: normal; margin-right: 15px;">
+                                    <input type="radio" name="true-false-answer" id="question-answer-true" value="TRUE" required> 正确
+                                </label>
+                                <label style="font-weight: normal;">
+                                    <input type="radio" name="true-false-answer" id="question-answer-false" value="FALSE" required> 错误
+                                </label>
+                            </div>
+                        `;
+                        break;
+                        
+                    case '4':
+                        // 添加填空题答案输入
+                        answerContainer.innerHTML = `
+                            <label for="question-answer">正确答案 (多个空用逗号分隔)</label>
+                            <input type="text" id="question-answer" class="form-control" placeholder="输入答案，如: 答案1,答案2" required>
+                        `;
+                        break;
+                }
+            }
+            
+            // 保存题目
+            function saveQuestion() {
+                // 获取表单数据
+                const id = questionId.value;
+                const levelId = questionLevel.value;
+                const type = questionType.value;
+                const content = document.getElementById('question-content').value;
+                const score = document.getElementById('question-score').value;
+                const explanation = document.getElementById('question-explanation').value;
+                
+                // 获取选项和答案
+                let options = [];
+                let answer = '';
+                
+                switch (type) {
+                    case '1':
+                    case '2':
+                        // 获取选项
+                        document.querySelectorAll('.option-input').forEach(input => {
+                            options.push(input.value);
+                        });
+                        
+                        // 获取答案
+                        answer = document.getElementById('question-answer').value;
+                        break;
+                        
+                    case '3':
+                        // 获取判断题答案
+                        const trueRadio = document.getElementById('question-answer-true');
+                        const falseRadio = document.getElementById('question-answer-false');
+                        answer = trueRadio.checked ? 'TRUE' : (falseRadio.checked ? 'FALSE' : '');
+                        break;
+                        
+                    case '4':
+                        // 获取填空题答案
+                        answer = document.getElementById('question-answer').value;
+                        break;
+                }
+                
+                // 验证数据
+                if (!levelId || !content || !score || (type !== '3' && type !== '4' && options.length === 0) || !answer) {
+                    alert('请填写完整的题目信息');
+                    return;
+                }
+                
+                // 构建保存的数据
+                const questionData = {
+                    id: id || null,
+                    levelId: levelId,
+                    type: type,
+                    content: content,
+                    score: score,
+                    options: JSON.stringify(options),
+                    answer: answer,
+                    explanation: explanation
+                };
+                
+                // 构建请求URL和方法
+                const url = `/api/admin/questions${id ? `/${id}` : ''}`;
+                const method = id ? 'PUT' : 'POST';
+                
+                // 调用API保存数据
+                fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + adminToken
+                    },
+                    body: JSON.stringify(questionData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('保存题目数据失败');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.code === 200) {
+                        alert('保存成功');
+                        questionModal.style.display = 'none';
+                        loadQuestions();
+                    } else {
+                        alert('保存失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error saving question:', error);
+                    alert('保存失败，请稍后再试');
+                });
+            }
+            
+            // 删除题目
+            function deleteQuestion(id) {
+                if (!confirm('确定要删除这个题目吗？')) {
+                    return;
+                }
+                
+                // 调用API删除数据
+                fetch(`/api/admin/questions/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': 'Bearer ' + adminToken
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('删除题目失败');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.code === 200) {
+                        alert('删除成功');
+                        loadQuestions();
+                    } else {
+                        alert('删除失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting question:', error);
+                    alert('删除失败，请稍后再试');
+                });
+            }
+            
+            // 查看题目详情
+            function viewQuestion(id) {
+                // 查找选中的题目
+                const question = questions.find(q => q.id == id);
+                if (!question) return;
+                
+                // 格式化题型显示
+                let typeText = '';
+                switch (question.type) {
+                    case 1: typeText = '单选题'; break;
+                    case 2: typeText = '多选题'; break;
+                    case 3: typeText = '判断题'; break;
+                    case 4: typeText = '填空题'; break;
+                    default: typeText = question.type;
+                }
+                
+                // 获取关卡名称
+                let levelName = '未知关卡';
+                if (question.levelName) {
+                    levelName = question.levelName;
+                } else if (question.levelId) {
+                    const level = levels.find(l => l.id == question.levelId);
+                    if (level) {
+                        levelName = level.name;
+                    }
+                }
+                
+                // 格式化选项和答案显示
+                let optionsText = '';
+                let answerText = '';
+                
+                switch (question.type) {
+                    case 1:
+                    case 2:
+                        if (question.options && Array.isArray(question.options)) {
+                            optionsText = question.options.join('<br>');
+                        }
+                        answerText = question.answer;
+                        break;
+                        
+                    case 3:
+                        answerText = question.answer === 'TRUE' ? '正确' : '错误';
+                        break;
+                        
+                    case 4:
+                        answerText = question.answer;
+                        break;
+                }
+                
+                // 构建详情HTML
+                const detailHtml = `
+                    <div style="margin-bottom: 15px;">
+                        <strong>题目ID:</strong> ${question.id}
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>题目内容:</strong> ${question.content}
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>题目类型:</strong> ${typeText}
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>所属关卡:</strong> ${levelName}
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>分值:</strong> ${question.score}
+                    </div>
+                    ${optionsText ? `
+                    <div style="margin-bottom: 15px;">
+                        <strong>选项:</strong><br> ${optionsText}
+                    </div>
+                    ` : ''}
+                    <div style="margin-bottom: 15px;">
+                        <strong>答案:</strong> ${answerText}
+                    </div>
+                    ${question.explanation ? `
+                    <div style="margin-bottom: 15px;">
+                        <strong>解析:</strong> ${question.explanation}
+                    </div>
+                    ` : ''}
+                `;
+                
+                // 显示详情（使用模态框更合适，但这里暂用alert简化）
+                alert(detailHtml.replace(/<br>/g, '\n').replace(/<[^>]*>/g, ''));
+            }
+        });
+    </script>
+</body>
+</html>

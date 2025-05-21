@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员控制台 - 学习游戏平台</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .header {
+            background-color: #4e73df;
+            color: white;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            border: 1px solid #e3e6f0;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            padding: 20px;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+        .card-header {
+            font-weight: bold;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #e3e6f0;
+            padding-bottom: 10px;
+        }
+        .nav-menu {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .nav-item {
+            background-color: #4e73df;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .nav-item:hover {
+            background-color: #2e59d9;
+        }
+        .dashboard-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .dashboard-card {
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            color: white;
+        }
+        .dashboard-card h3 {
+            margin-top: 0;
+            font-size: 2.5rem;
+        }
+        .dashboard-card.primary { background-color: #4e73df; }
+        .dashboard-card.success { background-color: #1cc88a; }
+        .dashboard-card.warning { background-color: #f6c23e; }
+        .dashboard-card.danger { background-color: #e74a3b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>学习游戏平台 - 管理员控制台</h1>
+            <div>当前登录账号: <span id="current-admin">admin</span> | <a href="login.html" style="color: white;">退出登录</a></div>
+        </div>
+        
+        <div class="nav-menu">
+            <a href="index.html" class="nav-item">控制台</a>
+            <a href="pages/subjects.html" class="nav-item">学科管理</a>
+            <a href="pages/chapters.html" class="nav-item">章节管理</a>
+            <a href="pages/levels.html" class="nav-item">关卡管理</a>
+            <a href="pages/questions.html" class="nav-item">题目管理</a>
+            <a href="pages/users.html" class="nav-item">用户管理</a>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">控制台概览</div>
+            <div class="dashboard-items">
+                <div class="dashboard-card primary">
+                    <p>总学科数</p>
+                    <h3 id="subject-count">0</h3>
+                </div>
+                <div class="dashboard-card success">
+                    <p>总章节数</p>
+                    <h3 id="chapter-count">0</h3>
+                </div>
+                <div class="dashboard-card warning">
+                    <p>总关卡数</p>
+                    <h3 id="level-count">0</h3>
+                </div>
+                <div class="dashboard-card danger">
+                    <p>注册用户数</p>
+                    <h3 id="user-count">0</h3>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">系统信息</div>
+            <div>
+                <p>系统版本: 1.0.0</p>
+                <p>服务器时间: <span id="server-time"></span></p>
+                <p>最后更新时间: 2025年5月6日</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 更新服务器时间
+        function updateServerTime() {
+            const now = new Date();
+            document.getElementById('server-time').textContent = now.toLocaleString();
+        }
+        
+        // 页面加载时检查登录状态
+        document.addEventListener('DOMContentLoaded', function() {
+            updateServerTime();
+            setInterval(updateServerTime, 1000);
+            
+            const adminToken = localStorage.getItem('adminToken');
+            if (!adminToken) {
+                // 未登录，跳转到登录页
+                // window.location.href = 'login.html';
+                // 开发阶段临时注释，方便直接访问
+            }
+            
+            // 获取数据统计
+            fetchStatistics();
+        });
+        
+        // 获取数据统计
+        function fetchStatistics() {
+            const adminToken = localStorage.getItem('adminToken');
+            
+            // 获取学科数量
+            fetch('/api/admin/dashboard/subjects/count', {
+                headers: {
+                    'Authorization': 'Bearer ' + adminToken
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('获取学科数量失败');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.code === 200) {
+                    document.getElementById('subject-count').textContent = data.data;
+                }
+            })
+            .catch(error => console.error('Error fetching subject count:', error));
+                
+            // 获取章节数量
+            fetch('/api/admin/dashboard/chapters/count', {
+                headers: {
+                    'Authorization': 'Bearer ' + adminToken
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('获取章节数量失败');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.code === 200) {
+                    document.getElementById('chapter-count').textContent = data.data;
+                }
+            })
+            .catch(error => console.error('Error fetching chapter count:', error));
+                
+            // 获取关卡数量
+            fetch('/api/admin/dashboard/levels/count', {
+                headers: {
+                    'Authorization': 'Bearer ' + adminToken
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('获取关卡数量失败');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.code === 200) {
+                    document.getElementById('level-count').textContent = data.data;
+                }
+            })
+            .catch(error => console.error('Error fetching level count:', error));
+                
+            // 获取用户数量
+            fetch('/api/admin/dashboard/users/count', {
+                headers: {
+                    'Authorization': 'Bearer ' + adminToken
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('获取用户数量失败');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.code === 200) {
+                    document.getElementById('user-count').textContent = data.data;
+                }
+            })
+            .catch(error => console.error('Error fetching user count:', error));
+        }
+    </script>
+</body>
+</html>

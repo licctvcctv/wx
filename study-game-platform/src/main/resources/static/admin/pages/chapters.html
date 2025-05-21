@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>章节管理 - 学习游戏平台管理后台</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.1/css/dataTables.bootstrap5.min.css">
+    <style>
+        .card {
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            margin-bottom: 1.5rem;
+        }
+        .btn-circle {
+            width: 2rem;
+            height: 2rem;
+            padding: 0.375rem;
+            border-radius: 50%;
+            text-align: center;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold">章节列表</h6>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addChapterModal">
+                        <i class="bi bi-plus"></i> 添加章节
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="subjectFilter" class="form-label">按学科筛选：</label>
+                    <select class="form-select" id="subjectFilter">
+                        <option value="">所有学科</option>
+                    </select>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="chaptersTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>章节名称</th>
+                                <th>所属学科</th>
+                                <th>顺序</th>
+                                <th>状态</th>
+                                <th>创建时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="chaptersTableBody">
+                            <!-- 表格数据将通过JavaScript动态加载 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加章节模态框 -->
+    <div class="modal fade" id="addChapterModal" tabindex="-1" aria-labelledby="addChapterModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addChapterModalLabel">添加章节</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addChapterForm">
+                        <div class="mb-3">
+                            <label for="chapterSubject" class="form-label">所属学科</label>
+                            <select class="form-select" id="chapterSubject" required>
+                                <option value="">请选择学科</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="chapterName" class="form-label">章节名称</label>
+                            <input type="text" class="form-control" id="chapterName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="chapterDescription" class="form-label">章节描述</label>
+                            <textarea class="form-control" id="chapterDescription" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="chapterOrder" class="form-label">显示顺序</label>
+                            <input type="number" class="form-control" id="chapterOrder" min="1" value="1">
+                            <small class="form-text text-muted">数字越小，显示越靠前</small>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="chapterActive" checked>
+                                <label class="form-check-label" for="chapterActive">
+                                    启用章节
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="saveChapterBtn">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑章节模态框 -->
+    <div class="modal fade" id="editChapterModal" tabindex="-1" aria-labelledby="editChapterModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editChapterModalLabel">编辑章节</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editChapterForm">
+                        <input type="hidden" id="editChapterId">
+                        <div class="mb-3">
+                            <label for="editChapterSubject" class="form-label">所属学科</label>
+                            <select class="form-select" id="editChapterSubject" required>
+                                <option value="">请选择学科</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editChapterName" class="form-label">章节名称</label>
+                            <input type="text" class="form-control" id="editChapterName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editChapterDescription" class="form-label">章节描述</label>
+                            <textarea class="form-control" id="editChapterDescription" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editChapterOrder" class="form-label">显示顺序</label>
+                            <input type="number" class="form-control" id="editChapterOrder" min="1">
+                            <small class="form-text text-muted">数字越小，显示越靠前</small>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="editChapterActive">
+                                <label class="form-check-label" for="editChapterActive">
+                                    启用章节
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="updateChapterBtn">更新</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.1/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.1/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        let chaptersTable;
+        let subjects = [];
+        
+        $(document).ready(function() {
+            const baseUrl = window.location.protocol + '//' + window.location.host;
+            const token = localStorage.getItem('adminToken');
+            
+            if (!token) {
+                window.parent.location.href = '../login.html';
+                return;
+            }
+            
+            // 初始化DataTable
+            chaptersTable = $('#chaptersTable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.1/i18n/zh.json'
+                },
+                columns: [
+                    { data: 'id' },
+                    { data: 'name' },
+                    { 
+                        data: 'subject',
+                        render: function(data) {
+                            return data ? data.name : '';
+                        }
+                    },
+                    { data: 'sortOrder' },
+                    { 
+                        data: 'status',
+                        render: function(data) {
+                            return data === 1 ? 
+                                '<span class="badge bg-success">启用</span>' : 
+                                '<span class="badge bg-danger">禁用</span>';
+                        } 
+                    },
+                    { 
+                        data: 'createTime',
+                        render: function(data, type, row, meta) {
+                            console.log('Rendering date:', data, 'type:', type, 'row ID:', row.id);
+                            // 直接返回日期字符串或短线
+                            if (data === null || data === undefined || data === '') {
+                                return '-';
+                            }
+                            return data;
+                        },
+                        defaultContent: '-'
+                    },
+                    {
+                        data: null,
+                        orderable: false,
+                        render: function(data) {
+                            return `
+                                <button class="btn btn-primary btn-circle edit-chapter" data-id="${data.id}" title="编辑">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-danger btn-circle delete-chapter" data-id="${data.id}" title="删除">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            `;
+                        }
+                    }
+                ]
+            });
+            
+            // 加载所有学科
+            loadSubjects();
+            
+            // 学科过滤器变化事件
+            $('#subjectFilter').change(function() {
+                const subjectId = $(this).val();
+                loadChapters(subjectId);
+            });
+            
+            // 添加章节
+            $('#saveChapterBtn').click(function() {
+                const subjectId = $('#chapterSubject').val();
+                const name = $('#chapterName').val();
+                const description = $('#chapterDescription').val();
+                const sortOrder = $('#chapterOrder').val();
+                const status = $('#chapterActive').is(':checked') ? 1 : 0;
+                
+                if (!subjectId) {
+                    alert('请选择所属学科');
+                    return;
+                }
+                
+                if (!name) {
+                    alert('请输入章节名称');
+                    return;
+                }
+                
+                const chapter = {
+                    name: name,
+                    description: description,
+                    subjectId: subjectId,
+                    sortOrder: sortOrder,
+                    status: status
+                };
+                
+                fetch('/api/admin/chapters', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(chapter)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('添加章节失败');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.code === 200) {
+                        $('#addChapterModal').modal('hide');
+                        $('#addChapterForm')[0].reset();
+                        loadChapters($('#subjectFilter').val());
+                        alert('章节添加成功');
+                    } else {
+                        alert('添加失败：' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('添加失败，请稍后重试');
+                });
+            });
+            
+            // 编辑章节按钮点击事件 - 使用委托事件
+            $(document).on('click', '.edit-chapter', function() {
+                console.log('编辑按钮被点击');
+                const id = $(this).data('id');
+                console.log('章节ID:', id);
+                
+                // 从服务器获取章节数据
+                fetch('/api/admin/chapters/' + id, {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.code === 200) {
+                        const chapter = data.data;
+                        $('#editChapterId').val(chapter.id);
+                        $('#editChapterName').val(chapter.name);
+                        $('#editChapterDescription').val(chapter.description || '');
+                        $('#editChapterOrder').val(chapter.sortOrder);
+                        $('#editChapterActive').prop('checked', chapter.status === 1);
+                        
+                        // 设置学科选择
+                        $('#editChapterSubject').val(chapter.subjectId);
+                        
+                        $('#editChapterModal').modal('show');
+                    } else {
+                        alert('获取章节数据失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('获取章节数据出错:', error);
+                    alert('获取章节数据失败');
+                });
+            });
+            
+            // 更新章节
+            $('#updateChapterBtn').click(function() {
+                const id = $('#editChapterId').val();
+                const subjectId = $('#editChapterSubject').val();
+                const name = $('#editChapterName').val();
+                const description = $('#editChapterDescription').val();
+                const sortOrder = $('#editChapterOrder').val();
+                const status = $('#editChapterActive').is(':checked') ? 1 : 0;
+                
+                if (!subjectId) {
+                    alert('请选择所属学科');
+                    return;
+                }
+                
+                if (!name) {
+                    alert('请输入章节名称');
+                    return;
+                }
+                
+                const chapter = {
+                    id: id,
+                    name: name,
+                    description: description,
+                    subjectId: subjectId,
+                    sortOrder: sortOrder,
+                    status: status
+                };
+                
+                fetch('/api/admin/chapters/' + id, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(chapter)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('更新章节失败');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.code === 200) {
+                        $('#editChapterModal').modal('hide');
+                        loadChapters($('#subjectFilter').val());
+                        alert('章节更新成功');
+                    } else if (data.code === 400) {
+                        alert('更新失败：' + data.message);
+                    } else {
+                        alert('更新失败，请稍后重试');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('更新失败，请稍后重试');
+                });
+            });
+            
+            // 删除章节按钮点击事件
+            $('#chaptersTable').on('click', '.delete-chapter', function() {
+                const id = $(this).data('id');
+                
+                if (confirm('确定要删除该章节吗？删除后不可恢复，且会影响关联的关卡和题目数据！')) {
+                    fetch('/api/admin/chapters/' + id, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': 'Bearer ' + token
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('删除章节失败');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.code === 200) {
+                            loadChapters($('#subjectFilter').val());
+                            alert('章节删除成功');
+                        } else if (data.code === 400) {
+                            alert('删除失败：' + data.message);
+                        } else {
+                            alert('删除失败，请稍后重试');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('删除失败，请稍后重试');
+                    });
+                }
+            });
+            
+            // 加载所有学科
+            function loadSubjects() {
+                fetch('/api/admin/subjects', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('获取学科数据失败');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.code === 200) {
+                        subjects = data.data || [];
+                        
+                        // 填充学科选择框
+                        populateSubjectSelects(subjects);
+                        
+                        // 加载章节数据
+                        loadChapters('');
+                    } else {
+                        console.error('Failed to load subjects:', data.message);
+                        alert('加载学科数据失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading subjects:', error);
+                    alert('加载学科数据失败，请稍后重试');
+                    
+                    // 如果加载失败，仍然需要初始化界面
+                    populateSubjectSelects([]);
+                    loadChapters('');
+                });
+            }
+            
+            // 填充学科选择框
+            function populateSubjectSelects(subjects) {
+                const $subjectFilter = $('#subjectFilter');
+                const $chapterSubject = $('#chapterSubject');
+                const $editChapterSubject = $('#editChapterSubject');
+                
+                $subjectFilter.html('<option value="">所有学科</option>');
+                $chapterSubject.html('<option value="">请选择学科</option>');
+                $editChapterSubject.html('<option value="">请选择学科</option>');
+                
+                subjects.forEach(subject => {
+                    if (subject.status === 1) {
+                        $subjectFilter.append(`<option value="${subject.id}">${subject.name}</option>`);
+                        $chapterSubject.append(`<option value="${subject.id}">${subject.name}</option>`);
+                        $editChapterSubject.append(`<option value="${subject.id}">${subject.name}</option>`);
+                    }
+                });
+            }
+            
+            // 加载章节数据
+            function loadChapters(subjectId) {
+                let url = '/api/admin/chapters';
+                if (subjectId) {
+                    url += '/subject/' + subjectId;
+                }
+                
+                fetch(url, {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('获取章节数据失败');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.code === 200) {
+                        let chapters = data.data || [];
+                        
+                        // 详细记录章节数据
+                        console.log('章节数据:', chapters);
+                        
+                        // 查看第一条数据的日期字段详情
+                        if (chapters.length > 0) {
+                            console.log('第一条数据:', chapters[0]);
+                            console.log('创建时间类型:', typeof chapters[0].createTime);
+                            console.log('创建时间值:', chapters[0].createTime);
+                        }
+                        
+                        // 预处理数据，确保日期格式正确
+                        chapters.forEach(chapter => {
+                            // 如果日期为null则设置为空字符串，避免显示为短线
+                            if (chapter.createTime === null) {
+                                console.log(`章节ID ${chapter.id} 创建时间为null`);
+                            }
+                        });
+                        
+                        chaptersTable.clear();
+                        chaptersTable.rows.add(chapters).draw();
+                    } else {
+                        console.error('Failed to load chapters:', data.message);
+                        alert('加载章节数据失败: ' + data.message);
+                        chaptersTable.clear().draw();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading chapters:', error);
+                    alert('加载章节数据失败，请稍后重试');
+                    chaptersTable.clear().draw();
+                });
+            }
+        });
+    </script>
+</body>
+</html>

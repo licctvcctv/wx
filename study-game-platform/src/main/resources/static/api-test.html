@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API测试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .test-card {
+            flex: 1 1 400px;
+            margin: 10px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        h2 {
+            color: #666;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            min-height: 100px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .success {
+            color: #4CAF50;
+        }
+        .error {
+            color: #f44336;
+        }
+        .header-value {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-radius: 4px 4px 0 0;
+        }
+        .tab.active {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-bottom: 1px solid #f9f9f9;
+            margin-bottom: -1px;
+        }
+    </style>
+</head>
+<body>
+    <h1>API测试页面</h1>
+    
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('form')">表单测试</div>
+        <div class="tab" onclick="switchTab('curl')">cURL命令</div>
+    </div>
+    
+    <div id="form-tab" class="tab-content">
+        <div class="container">
+            <!-- 注册测试 -->
+            <div class="test-card">
+                <h2>注册测试</h2>
+                <div class="form-group">
+                    <label for="reg-username">用户名</label>
+                    <input type="text" id="reg-username" placeholder="请输入用户名">
+                    
+                    <label for="reg-password">密码</label>
+                    <input type="password" id="reg-password" placeholder="请输入密码">
+                    
+                    <label for="reg-nickname">昵称</label>
+                    <input type="text" id="reg-nickname" placeholder="请输入昵称">
+                    
+                    <div class="header-value">
+                        <label>
+                            <input type="radio" name="reg-content-type" value="application/json" checked> 
+                            application/json
+                        </label>
+                        <label>
+                            <input type="radio" name="reg-content-type" value="application/x-www-form-urlencoded"> 
+                            application/x-www-form-urlencoded
+                        </label>
+                    </div>
+                    
+                    <button onclick="testRegister()">测试注册</button>
+                </div>
+                <div class="result" id="register-result">
+                    <pre>结果将显示在这里...</pre>
+                </div>
+            </div>
+            
+            <!-- 登录测试 -->
+            <div class="test-card">
+                <h2>登录测试</h2>
+                <div class="form-group">
+                    <label for="login-username">用户名</label>
+                    <input type="text" id="login-username" placeholder="请输入用户名">
+                    
+                    <label for="login-password">密码</label>
+                    <input type="password" id="login-password" placeholder="请输入密码">
+                    
+                    <div class="header-value">
+                        <label>
+                            <input type="radio" name="login-content-type" value="application/json" checked> 
+                            application/json
+                        </label>
+                        <label>
+                            <input type="radio" name="login-content-type" value="application/x-www-form-urlencoded"> 
+                            application/x-www-form-urlencoded
+                        </label>
+                    </div>
+                    
+                    <button onclick="testLogin()">测试登录</button>
+                </div>
+                <div class="result" id="login-result">
+                    <pre>结果将显示在这里...</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="curl-tab" class="tab-content" style="display: none;">
+        <div class="test-card">
+            <h2>注册API - cURL命令</h2>
+            <pre>curl -X POST http://localhost:8080/api/auth/register \
+    -H "Content-Type: application/json" \
+    -d '{"username":"test_user","password":"password123","nickname":"测试用户"}'</pre>
+            
+            <h2>登录API - cURL命令</h2>
+            <pre>curl -X POST http://localhost:8080/api/auth/login \
+    -H "Content-Type: application/json" \
+    -d '{"username":"test_user","password":"password123"}'</pre>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            const tabs = document.getElementsByClassName('tab');
+            const tabContents = document.getElementsByClassName('tab-content');
+            
+            for (let i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove('active');
+            }
+            
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].style.display = 'none';
+            }
+            
+            if (tabName === 'form') {
+                document.getElementById('form-tab').style.display = 'block';
+                document.getElementsByClassName('tab')[0].classList.add('active');
+            } else if (tabName === 'curl') {
+                document.getElementById('curl-tab').style.display = 'block';
+                document.getElementsByClassName('tab')[1].classList.add('active');
+            }
+        }
+        
+        function formatResponse(response) {
+            return JSON.stringify(response, null, 2);
+        }
+        
+        function testRegister() {
+            const username = document.getElementById('reg-username').value;
+            const password = document.getElementById('reg-password').value;
+            const nickname = document.getElementById('reg-nickname').value;
+            const resultElement = document.getElementById('register-result');
+            const contentType = document.querySelector('input[name="reg-content-type"]:checked').value;
+            
+            if (!username || !password || !nickname) {
+                resultElement.innerHTML = '<pre class="error">请填写所有字段</pre>';
+                return;
+            }
+            
+            resultElement.innerHTML = '<pre>正在发送请求...</pre>';
+            
+            let data;
+            let headers = {
+                'Content-Type': contentType
+            };
+            
+            if (contentType === 'application/json') {
+                data = JSON.stringify({
+                    username: username,
+                    password: password,
+                    nickname: nickname
+                });
+            } else {
+                data = `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&nickname=${encodeURIComponent(nickname)}`;
+            }
+            
+            fetch('http://localhost:8080/api/auth/register', {
+                method: 'POST',
+                headers: headers,
+                body: data
+            })
+            .then(response => {
+                const statusText = `状态码: ${response.status} ${response.statusText}`;
+                return response.json().then(data => {
+                    return {
+                        status: response.status,
+                        statusText: statusText,
+                        data: data
+                    };
+                });
+            })
+            .then(result => {
+                const statusClass = result.status >= 200 && result.status < 300 ? 'success' : 'error';
+                resultElement.innerHTML = `<div class="${statusClass}">${result.statusText}</div><pre>${formatResponse(result.data)}</pre>`;
+            })
+            .catch(error => {
+                resultElement.innerHTML = `<pre class="error">请求出错: ${error.message}</pre>`;
+            });
+        }
+        
+        function testLogin() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            const resultElement = document.getElementById('login-result');
+            const contentType = document.querySelector('input[name="login-content-type"]:checked').value;
+            
+            if (!username || !password) {
+                resultElement.innerHTML = '<pre class="error">请填写所有字段</pre>';
+                return;
+            }
+            
+            resultElement.innerHTML = '<pre>正在发送请求...</pre>';
+            
+            let data;
+            let headers = {
+                'Content-Type': contentType
+            };
+            
+            if (contentType === 'application/json') {
+                data = JSON.stringify({
+                    username: username,
+                    password: password
+                });
+            } else {
+                data = `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
+            }
+            
+            fetch('http://localhost:8080/api/auth/login', {
+                method: 'POST',
+                headers: headers,
+                body: data
+            })
+            .then(response => {
+                const statusText = `状态码: ${response.status} ${response.statusText}`;
+                return response.json().then(data => {
+                    return {
+                        status: response.status,
+                        statusText: statusText,
+                        data: data
+                    };
+                });
+            })
+            .then(result => {
+                const statusClass = result.status >= 200 && result.status < 300 ? 'success' : 'error';
+                resultElement.innerHTML = `<div class="${statusClass}">${result.statusText}</div><pre>${formatResponse(result.data)}</pre>`;
+            })
+            .catch(error => {
+                resultElement.innerHTML = `<pre class="error">请求出错: ${error.message}</pre>`;
+            });
+        }
+    </script>
+</body>
+</html>

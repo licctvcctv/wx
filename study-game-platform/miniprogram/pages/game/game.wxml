@@ -1,0 +1,131 @@
+<!--pages/game/game.wxml-->
+<view class="container">
+  <!-- 游戏开始前的页面 -->
+  <view class="start-panel" wx:if="{{!gameStarted && !gameCompleted}}">
+    <view class="level-info">
+      <view class="level-title">准备开始游戏</view>
+      <view class="level-desc">挑战你的知识极限!</view>
+    </view>
+    <view class="start-button" bindtap="startGame">开始闯关</view>
+    <view class="back-button" bindtap="backToLevels">返回关卡列表</view>
+  </view>
+
+  <!-- 游戏中的页面 -->
+  <view class="game-panel" wx:if="{{gameStarted && !gameCompleted}}">
+    <view class="progress-bar">
+      <view class="progress-info">
+        <text>第 {{currentIndex + 1}}/{{totalQuestions}} 题</text>
+        <text class="timer">用时: {{timeUsed}}秒</text>
+      </view>
+      <view class="progress-track">
+        <view class="progress-fill" style="width: {{(currentIndex + 1) / totalQuestions * 100}}%"></view>
+      </view>
+    </view>
+
+    <view class="question-card">
+      <view class="question-title">{{currentQuestion.content}}</view>
+      
+      <!-- 调试信息区域 -->
+      <view class="debug-info" wx:if="{{debug}}">
+        <text>{{debug}}</text>
+      </view>
+      
+      <view class="options">
+        <!-- 添加题目类型提示 -->
+        <view class="question-type-hint" wx:if="{{currentQuestion.type === 'MULTIPLE_CHOICE'}}">(多选题：请选择多个正确答案)</view>
+        <view class="question-type-hint" wx:elif="{{currentQuestion.type === 'SINGLE_CHOICE'}}">(单选题：请选择一个正确答案)</view>
+        <view class="question-type-hint" wx:elif="{{currentQuestion.type === 'TRUE_FALSE'}}">(判断题：请选择正确或错误)</view>
+        <view class="question-type-hint" wx:else>(请回答问题)</view>
+        
+        <!-- 当前选中答案的调试信息 -->
+        <view class="debug-info" wx:if="{{debug}}">
+          <text>选中答案: {{userAnswer || '无'}} | 多选项: {{userAnswers.length > 0 ? userAnswers : '无'}}</text>
+        </view>
+        
+        <view class="option {{userAnswer == 'A' || userAnswers.indexOf('A') > -1 ? 'selected' : ''}}" style="{{userAnswer == 'A' || userAnswers.indexOf('A') > -1 ? 'background-color: #e6f0ff; border: 4rpx solid #3a7bd5;' : ''}}"
+          bindtap="selectAnswer" data-answer="A">
+          <text class="option-label" style="{{userAnswer == 'A' || userAnswers.indexOf('A') > -1 ? 'background-color: #3a7bd5; color: white;' : ''}}">A</text>
+          <text class="option-content">{{currentQuestion.optionA || ''}}</text>
+        </view>
+        
+        <view class="option {{userAnswer == 'B' || userAnswers.indexOf('B') > -1 ? 'selected' : ''}}" style="{{userAnswer == 'B' || userAnswers.indexOf('B') > -1 ? 'background-color: #e6f0ff; border: 4rpx solid #3a7bd5;' : ''}}"
+          bindtap="selectAnswer" data-answer="B">
+          <text class="option-label" style="{{userAnswer == 'B' || userAnswers.indexOf('B') > -1 ? 'background-color: #3a7bd5; color: white;' : ''}}">B</text>
+          <text class="option-content">{{currentQuestion.optionB || ''}}</text>
+        </view>
+        
+        <view class="option {{userAnswer == 'C' || userAnswers.indexOf('C') > -1 ? 'selected' : ''}}" style="{{userAnswer == 'C' || userAnswers.indexOf('C') > -1 ? 'background-color: #e6f0ff; border: 4rpx solid #3a7bd5;' : ''}}"
+          bindtap="selectAnswer" data-answer="C">
+          <text class="option-label" style="{{userAnswer == 'C' || userAnswers.indexOf('C') > -1 ? 'background-color: #3a7bd5; color: white;' : ''}}">C</text>
+          <text class="option-content">{{currentQuestion.optionC || ''}}</text>
+        </view>
+        
+        <view class="option {{userAnswer == 'D' || userAnswers.indexOf('D') > -1 ? 'selected' : ''}}" style="{{userAnswer == 'D' || userAnswers.indexOf('D') > -1 ? 'background-color: #e6f0ff; border: 4rpx solid #3a7bd5;' : ''}}"
+          bindtap="selectAnswer" data-answer="D">
+          <text class="option-label" style="{{userAnswer == 'D' || userAnswers.indexOf('D') > -1 ? 'background-color: #3a7bd5; color: white;' : ''}}">D</text>
+          <text class="option-content">{{currentQuestion.optionD || ''}}</text>
+        </view>
+      </view>
+
+      <!-- 答题结果区域 -->
+      <view class="answer-result" wx:if="{{answerResult}}">
+        <view class="result-text {{answerResult.isCorrect ? 'correct' : 'wrong'}}">
+          {{answerResult.isCorrect ? '正确' : '错误'}}
+        </view>
+        <view class="score-text" wx:if="{{answerResult.isCorrect}}">
+          +{{answerResult.score}} 分
+        </view>
+        <view class="retry-tip" wx:if="{{!answerResult.isCorrect}}">
+          必须答对才能进入下一题
+        </view>
+        <view class="retry-button" wx:if="{{!answerResult.isCorrect}}" bindtap="retryQuestion">
+          重新回答
+        </view>
+      </view>
+
+      <view class="submit-button {{userAnswer ? 'active' : ''}}" bindtap="submitAnswer" wx:if="{{!answerResult}}">
+        提交答案
+      </view>
+    </view>
+  </view>
+
+  <!-- 游戏完成的页面 -->
+  <view class="complete-panel" wx:if="{{gameCompleted}}">
+    <view class="complete-header">
+      <view class="complete-title">闯关成功</view>
+      <view class="complete-desc">你的表现很棒!</view>
+    </view>
+
+    <view class="score-card">
+      <view class="score-item">
+        <text class="score-label">总分数</text>
+        <text class="score-value">{{progress.totalScore}}</text>
+      </view>
+      <view class="score-item">
+        <text class="score-label">正确题数</text>
+        <text class="score-value">{{progress.correctCount}}/{{totalQuestions}}</text>
+      </view>
+      <view class="score-item">
+        <text class="score-label">用时</text>
+        <text class="score-value">{{timeUsed}}秒</text>
+      </view>
+    </view>
+
+    <view class="leaderboard">
+      <view class="leaderboard-title">排行榜</view>
+      <view class="leaderboard-list">
+        <view class="leaderboard-item" wx:for="{{leaderboard}}" wx:key="index">
+          <text class="rank">{{index + 1}}</text>
+          <text class="username">{{item.userId}}</text>
+          <text class="score">{{item.totalScore}}分</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="action-buttons">
+      <view class="action-button" bindtap="viewWrongQuestions">查看错题</view>
+      <view class="action-button" bindtap="restartGame">重新开始</view>
+      <view class="action-button" bindtap="backToLevels">返回关卡</view>
+    </view>
+  </view>
+</view>
