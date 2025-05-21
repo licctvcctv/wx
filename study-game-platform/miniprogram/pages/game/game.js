@@ -17,7 +17,7 @@ Page({
     answerResult: null,
     timeUsed: 0,
     timerInterval: null,
-    leaderboard: [],
+    // leaderboard: [], // Removed leaderboard data property
     debug: '' // 用于调试显示
   },
 
@@ -267,62 +267,71 @@ Page({
       success: function (res) {
         wx.hideLoading();
         if ([0, 200].includes(res.code)) {
-          // 显示答题结果
+          if (res.data.levelFailed === true) {
+            // Handle "Fail Fast" scenario
+            const accuracyPercent = (res.data.attemptAccuracy * 100).toFixed(1) + '%';
+            let failContent = `${res.data.message || '答题错误，闯关失败！'}\n`;
+            failContent += `本次得分：${res.data.attemptScore}\n`;
+            failContent += `正确率：${accuracyPercent}`;
+
+            wx.showModal({
+              title: '闯关失败',
+              content: failContent,
+              showCancel: false,
+              confirmText: '返回关卡',
+              success: function (modalRes) {
+                if (modalRes.confirm) {
+                  wx.navigateBack(); // Navigate back to the previous page (e.g., level list)
+                }
+              }
+            });
+            return; // Stop further processing
+          }
+
+          // If not levelFailed, then the answer was correct.
+          // Original logic for correct answer / next question / level completion:
           that.setData({
             answerResult: {
-              isCorrect: res.data.isCorrect,
+              isCorrect: true, // If levelFailed is false, isCorrect for the question must be true
               score: res.data.score
             },
             progress: res.data.progress
           });
 
-          // 如果是最后一题，则完成游戏
           if (res.data.isLastQuestion) {
             setTimeout(() => {
               that.completeGame();
-            }, 1500);
-          } else if (res.data.isCorrect) {
-            // 只有答对才能进入下一题
-            // 获取下一题数据
+            }, 1500); // Delay to show feedback for the last question
+          } else {
+            // Load next question (since it was a correct answer and not the last question)
             const nextQuestion = res.data.nextQuestion || {};
             console.log("原始下一题数据:", JSON.stringify(nextQuestion));
             
-            // 解析options字符串
             try {
               if (nextQuestion.options && typeof nextQuestion.options === 'string') {
-                // 尝试解析JSON字符串
                 const optionsArray = JSON.parse(nextQuestion.options);
                 if (Array.isArray(optionsArray)) {
                   nextQuestion.optionA = optionsArray[0] || '';
                   nextQuestion.optionB = optionsArray[1] || '';
                   nextQuestion.optionC = optionsArray[2] || '';
                   nextQuestion.optionD = optionsArray[3] || '';
-                  console.log("解析下一题选项数组成功:", optionsArray);
                 }
               }
             } catch (error) {
               console.error("解析下一题选项失败:", error);
-              // 解析失败时的备用方案
               nextQuestion.optionA = nextQuestion.optionA || '选项A';
               nextQuestion.optionB = nextQuestion.optionB || '选项B';
               nextQuestion.optionC = nextQuestion.optionC || '选项C';
               nextQuestion.optionD = nextQuestion.optionD || '选项D';
             }
             
-            // 将数字类型转换为字符串类型以便于前端判断
-            if (nextQuestion.type === 1) {
-              nextQuestion.type = 'SINGLE_CHOICE'; // 单选题
-            } else if (nextQuestion.type === 2) {
-              nextQuestion.type = 'MULTIPLE_CHOICE'; // 多选题
-            } else if (nextQuestion.type === 3) {
-              nextQuestion.type = 'TRUE_FALSE'; // 判断题
-            } else if (nextQuestion.type === 4) {
-              nextQuestion.type = 'FILL_BLANK'; // 填空题
-            }
+            if (nextQuestion.type === 1) nextQuestion.type = 'SINGLE_CHOICE';
+            else if (nextQuestion.type === 2) nextQuestion.type = 'MULTIPLE_CHOICE';
+            else if (nextQuestion.type === 3) nextQuestion.type = 'TRUE_FALSE';
+            else if (nextQuestion.type === 4) nextQuestion.type = 'FILL_BLANK';
             
             console.log("处理后的下一题数据:", JSON.stringify(nextQuestion));
             
-            // 显示下一题
             setTimeout(() => {
               that.setData({
                 currentQuestion: nextQuestion,
@@ -330,26 +339,9 @@ Page({
                 userAnswer: '',
                 userAnswers: [],
                 answerResult: null,
-                debug: '题目类型: ' + nextQuestion.type // 显示题目类型用于调试
+                debug: '题目类型: ' + nextQuestion.type
               });
-            }, 1500);
-          } else {
-            // 答错题目，显示提示并允许重试
-            setTimeout(() => {
-              // 让用户看到答案结果后再提示
-              wx.showToast({
-                title: '答题错误，请重试！',
-                icon: 'none',
-                duration: 2000
-              });
-              
-              // 清空用户选择，允许重新选择
-              that.setData({
-                userAnswer: '',
-                userAnswers: [],
-                answerResult: null
-              });
-            }, 2000);
+            }, 1500); // Delay to show feedback before loading next question
           }
         } else {
           wx.showToast({
@@ -398,8 +390,8 @@ Page({
         if (res.code === 0 || res.code === 200) {
           that.setData({
             gameCompleted: true,
-            progress: res.data.progress,
-            leaderboard: res.data.leaderboard
+            progress: res.data.progress
+            // leaderboard: res.data.leaderboard // Removed leaderboard data setting
           });
         } else {
           wx.showToast({

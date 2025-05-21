@@ -12,6 +12,10 @@ import com.wechat.studygame.repository.SubjectRepository;
 import com.wechat.studygame.repository.UserAnswerRepository;
 import com.wechat.studygame.service.QuestionService;
 import com.wechat.studygame.service.UserAnswerService;
+import com.fasterxml.jackson.core.JsonProcessingException; // For logging
+import com.fasterxml.jackson.databind.ObjectMapper; // For logging
+import org.slf4j.Logger; // For logging
+import org.slf4j.LoggerFactory; // For logging
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +33,9 @@ import java.util.stream.Collectors;
  */
 @Service
 public class UserAnswerServiceImpl implements UserAnswerService {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserAnswerServiceImpl.class);
+    private static final ObjectMapper objectMapper = new ObjectMapper(); // For structured logging of results
 
     @Autowired
     private UserAnswerRepository userAnswerRepository;
@@ -388,10 +395,14 @@ public class UserAnswerServiceImpl implements UserAnswerService {
 
     @Override
     public Map<String, Object> getUserLearningStats(Long userId) {
+        logger.info("BEGIN - getUserLearningStats for userId: {}", userId);
         Map<String, Object> stats = new HashMap<>();
         
-        // 获取用户的所有答题记录
         List<UserAnswer> allAnswers = userAnswerRepository.findByUserId(userId);
+        if (allAnswers == null) { // Defensive check
+            allAnswers = new ArrayList<>();
+            logger.warn("userAnswerRepository.findByUserId({}) returned null. Initializing to empty list.", userId);
+        }
         
         // 计算总答题数
         int totalAnswers = allAnswers.size();
@@ -420,32 +431,64 @@ public class UserAnswerServiceImpl implements UserAnswerService {
         stats.put("avgAnswerTime", Math.round(avgAnswerTime * 10) / 10.0); // 保留一位小数
         
         // 计算不同题型的答题情况
-        Map<Integer, Long> questionTypeStats = allAnswers.stream()
+        Map<String, Long> questionTypeStatsByName = allAnswers.stream()
                 .collect(Collectors.groupingBy(
                         answer -> {
+                            Question question = null;
                             try {
-                                return questionService.getQuestionById(answer.getQuestionId()).getType();
+                                if (answer.getQuestionId() == null) {
+                                    logger.warn("UserAnswer with ID {} has null questionId.", answer.getId());
+                                    return "UNKNOWN_QUESTION_ID_NULL";
+                                }
+                                question = questionService.getQuestionById(answer.getQuestionId());
+                                if (question == null) {
+                                    logger.warn("Question not found for ID {}, referenced by UserAnswer ID {}. Marking as UNKNOWN_QUESTION_NOT_FOUND.", answer.getQuestionId(), answer.getId());
+                                    return "UNKNOWN_QUESTION_NOT_FOUND";
+                                }
+                                if (question.getType() == null) {
+                                    logger.warn("Question ID {} has null type. Marking as UNKNOWN_TYPE_NULL.", question.getId());
+                                    return "UNKNOWN_TYPE_NULL";
+                                }
+                                switch (question.getType()) {
+                                    case 1: return "SINGLE_CHOICE";
+                                    case 2: return "MULTIPLE_CHOICE";
+                                    case 3: return "TRUE_FALSE";
+                                    case 4: return "FILL_BLANK";
+                                    default:
+                                        logger.warn("Question ID {} has unrecognized type: {}. Marking as UNKNOWN_OTHER_TYPE.", question.getId(), question.getType());
+                                        return "UNKNOWN_OTHER_TYPE (" + question.getType() + ")";
+                                }
                             } catch (Exception e) {
-                                return 0; // 默认类型
+                                logger.error("Error retrieving question or type for UserAnswer ID {}: {}", answer.getId(), e.getMessage(), e);
+                                return "UNKNOWN_ERROR_FETCHING_TYPE";
                             }
                         },
                         Collectors.counting()
                 ));
-        stats.put("questionTypeStats", questionTypeStats);
+        stats.put("questionTypeStats", questionTypeStatsByName);
         
         // 计算错题数量
         long wrongAnswers = totalAnswers - correctAnswers;
         stats.put("wrongAnswers", wrongAnswers);
-        
+
+        try {
+            logger.info("END - getUserLearningStats for userId: {}. Stats: {}", userId, objectMapper.writeValueAsString(stats));
+        } catch (JsonProcessingException e) {
+            logger.warn("Error serializing learning stats to JSON for logging for userId: {}", userId, e);
+        }
         return stats;
     }
     
     @Override
     public Map<String, Object> getUserLearningTrend(Long userId) {
+        logger.info("BEGIN - getUserLearningTrend for userId: {}", userId);
         Map<String, Object> trend = new HashMap<>();
         
-        // 获取用户的所有答题记录
         List<UserAnswer> allAnswers = userAnswerRepository.findByUserId(userId);
+        if (allAnswers == null) { // Defensive check
+            allAnswers = new ArrayList<>();
+            logger.warn("userAnswerRepository.findByUserId({}) returned null. Initializing to empty list for trend.", userId);
+        }
         
         // 获取最近7天的日期
         List<String> last7Days = new ArrayList<>();
@@ -457,7 +500,14 @@ public class UserAnswerServiceImpl implements UserAnswerService {
         // 按日期分组，计算每天的答题数和正确率
         Map<String, List<UserAnswer>> answersByDate = allAnswers.stream()
                 .collect(Collectors.groupingBy(
-                        answer -> answer.getCreateTime().toLocalDate().toString()
+                        answer -> {
+                            if (answer.getCreateTime() == null) {
+                                // This case should ideally be prevented by database constraints (NOT NULL on create_time)
+                                logger.warn("UserAnswer with ID {} has null createTime. Defaulting to current date for trend calculation.", answer.getId());
+                                return LocalDate.now().toString();
+                            }
+                            return answer.getCreateTime().toLocalDate().toString();
+                        }
                 ));
         
         List<Integer> dailyAnswerCounts = new ArrayList<>();
@@ -481,20 +531,35 @@ public class UserAnswerServiceImpl implements UserAnswerService {
         trend.put("dates", last7Days);
         trend.put("answerCounts", dailyAnswerCounts);
         trend.put("correctRates", dailyCorrectRates);
-        
+
+        try {
+            logger.info("END - getUserLearningTrend for userId: {}. Trend: {}", userId, objectMapper.writeValueAsString(trend));
+        } catch (JsonProcessingException e) {
+            logger.warn("Error serializing learning trend to JSON for logging for userId: {}", userId, e);
+        }
         return trend;
     }
     
     @Override
     public Map<String, Object> getSubjectLearningStats(Long userId) {
-        Map<String, Object> subjectStats = new HashMap<>();
+        logger.info("BEGIN - getSubjectLearningStats for userId: {}", userId);
+        Map<String, Object> subjectStatsResult = new HashMap<>();
         
-        // 获取用户的所有答题记录
         List<UserAnswer> allAnswers = userAnswerRepository.findByUserId(userId);
+        if (allAnswers == null) { // Defensive check
+            allAnswers = new ArrayList<>();
+            logger.warn("userAnswerRepository.findByUserId({}) returned null. Initializing to empty list for subject stats.", userId);
+        }
         
-        // 过滤掉subjectId为null的记录，然后按学科分组
+        // Filter out records with null subjectId first, then group
         Map<Long, List<UserAnswer>> answersBySubject = allAnswers.stream()
-                .filter(answer -> answer.getSubjectId() != null)
+                .filter(answer -> {
+                    if (answer.getSubjectId() == null) {
+                        logger.warn("UserAnswer with ID {} has null subjectId. Excluding from subject stats.", answer.getId());
+                        return false;
+                    }
+                    return true;
+                })
                 .collect(Collectors.groupingBy(UserAnswer::getSubjectId));
         
         List<Map<String, Object>> subjectsData = new ArrayList<>();
@@ -506,34 +571,45 @@ public class UserAnswerServiceImpl implements UserAnswerService {
             Map<String, Object> subjectData = new HashMap<>();
             subjectData.put("subjectId", subjectId);
             
-            // 尝试获取学科名称，如果有SubjectService可以注入并调用
-            // subjectData.put("subjectName", subjectService.getSubjectById(subjectId).getName());
-            // 这里暂时用ID代替
-            subjectData.put("subjectName", "学科" + subjectId);
+            // Fetch actual subject name
+            String subjectName = subjectRepository.findById(subjectId)
+                                                 .map(Subject::getName)
+                                                 .orElse("学科 " + subjectId); // Default if not found
+            subjectData.put("subjectName", subjectName);
             
-            // 答题数
-            subjectData.put("answerCount", subjectAnswers.size());
+            // Answer count for this subject
+            int currentSubjectTotalAnswers = subjectAnswers.size();
+            subjectData.put("answerCount", currentSubjectTotalAnswers);
             
-            // 正确率
-            long correctCount = subjectAnswers.stream()
-                    .filter(UserAnswer::getIsCorrect)
+            // Correct rate for this subject
+            long correctAnswersInSubject = subjectAnswers.stream()
+                    .filter(UserAnswer::getIsCorrect) // Assumes getIsCorrect returns boolean
                     .count();
-            double correctRate = (double) correctCount / subjectAnswers.size() * 100;
+            
+            double correctRate = 0.0;
+            if (currentSubjectTotalAnswers > 0) {
+                correctRate = (double) correctAnswersInSubject / currentSubjectTotalAnswers * 100;
+            }
             subjectData.put("correctRate", Math.round(correctRate * 10) / 10.0);
             
-            // 平均分
+            // Average score for this subject
             double avgScore = subjectAnswers.stream()
-                    .mapToInt(UserAnswer::getScore)
+                    .mapToInt(UserAnswer::getScore) // Assumes getScore returns int
                     .average()
-                    .orElse(0);
+                    .orElse(0.0); // Default to 0.0 if no scores for this subject
             subjectData.put("avgScore", Math.round(avgScore * 10) / 10.0);
             
             subjectsData.add(subjectData);
         }
         
-        subjectStats.put("subjects", subjectsData);
-        
-        return subjectStats;
+        subjectStatsResult.put("subjects", subjectsData);
+
+        try {
+            logger.info("END - getSubjectLearningStats for userId: {}. Stats: {}", userId, objectMapper.writeValueAsString(subjectStatsResult));
+        } catch (JsonProcessingException e) {
+            logger.warn("Error serializing subject learning stats to JSON for logging for userId: {}", userId, e);
+        }
+        return subjectStatsResult;
     }
     
     @Override

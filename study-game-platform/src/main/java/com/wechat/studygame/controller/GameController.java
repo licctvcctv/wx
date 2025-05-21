@@ -91,11 +91,11 @@ public class GameController {
             // 检查答案是否正确
             boolean isCorrect = questionService.checkAnswer(question.getId(), request.getUserAnswer());
             
-            // 检查用户是否已经正确回答过这个题目
-            boolean alreadyAnsweredCorrectly = userAnswerService.hasCorrectlyAnswered(userId, question.getId());
+            // 检查用户是否已经正确回答过这个题目 (This is for UserAnswer history, not attempt scoring)
+            // boolean alreadyAnsweredCorrectly = userAnswerService.hasCorrectlyAnswered(userId, question.getId());
             
-            // 计算得分 - 仅当用户之前未正确回答过此题且本次答对时才计分
-            int score = (isCorrect && !alreadyAnsweredCorrectly) ? question.getScore() : 0;
+            // 计算得分 - Score is awarded if the current answer is correct for this attempt.
+            int score = isCorrect ? question.getScore() : 0;
             
             // 保存答题记录
             userAnswerService.saveUserAnswer(
@@ -105,18 +105,9 @@ public class GameController {
             
             // 获取用户进度
             UserProgress progress = userProgressService.getUserProgressByLevelId(userId, request.getLevelId());
-            
-            // 如果答对了且之前未正确回答过，更新进度
-            if (isCorrect && !alreadyAnsweredCorrectly) {
-                progress.setCorrectCount(progress.getCorrectCount() + 1);
-                progress.setTotalScore(progress.getTotalScore() + score);
-                progress = userProgressService.updateUserProgress(progress);
-            }
-            
-            // 获取关卡所有题目
+
+            // 获取关卡所有题目 for calculating currentIndex and for next question logic
             List<Question> questions = questionService.getQuestionsByLevel(request.getLevelId());
-            
-            // 找到当前题目的索引
             int currentIndex = -1;
             for (int i = 0; i < questions.size(); i++) {
                 if (questions.get(i).getId().equals(question.getId())) {
@@ -124,23 +115,52 @@ public class GameController {
                     break;
                 }
             }
-            
+
             Map<String, Object> result = new HashMap<>();
-            result.put("isCorrect", isCorrect);
-            result.put("score", score);
-            result.put("progress", progress);
-            
-            // 如果不是最后一题，返回下一题
-            if (currentIndex < questions.size() - 1) {
-                Question nextQuestion = questions.get(currentIndex + 1);
-                result.put("nextQuestion", nextQuestion);
-                result.put("currentIndex", currentIndex + 1);
-                result.put("isLastQuestion", false);
+
+            if (!isCorrect) {
+                // Handle incorrect answer - FAIL FAST
+                result.put("isCorrect", false);
+                result.put("levelFailed", true);
+                result.put("message", "答题错误，闯关失败！");
+                
+                // Score and correct count are from UserProgress *before* this incorrect answer.
+                // The UserAnswer for the incorrect answer itself has score 0.
+                // So, progress.getTotalScore() and progress.getCorrectCount() are already correct.
+                result.put("attemptScore", progress.getTotalScore());
+                
+                int totalAttemptedQuestions = currentIndex + 1; // Number of questions presented up to and including this one
+                double accuracy = 0.0;
+                if (totalAttemptedQuestions > 0) {
+                    // progress.getCorrectCount() is the count of correct answers *before* this incorrect one
+                    accuracy = (double) progress.getCorrectCount() / totalAttemptedQuestions;
+                }
+                result.put("attemptAccuracy", accuracy);
+                // UserProgress status remains 'in progress'. No further updates to UserProgress for incorrect answer.
+                return ApiResponse.success(result);
             } else {
-                result.put("isLastQuestion", true);
+                // CORRECT ANSWER LOGIC
+                // Update progress (score, correctCount) for the current correct answer
+                progress.setCorrectCount(progress.getCorrectCount() + 1);
+                progress.setTotalScore(progress.getTotalScore() + score); // score is from question.getScore()
+                progress = userProgressService.updateUserProgress(progress);
+
+                result.put("isCorrect", true);
+                result.put("score", score); // Score for this specific question
+                result.put("progress", progress); // Updated progress
+
+                if (currentIndex < questions.size() - 1) {
+                    Question nextQuestion = questions.get(currentIndex + 1);
+                    result.put("nextQuestion", nextQuestion);
+                    result.put("currentIndex", currentIndex + 1);
+                    result.put("isLastQuestion", false);
+                } else {
+                    result.put("isLastQuestion", true);
+                    // Note: The actual level completion (setting UserProgress status to 2)
+                    // happens in the /complete endpoint, not here.
+                }
+                return ApiResponse.success(result);
             }
-            
-            return ApiResponse.success(result);
         } catch (Exception e) {
             return ApiResponse.error("提交答案失败：" + e.getMessage());
         }
@@ -171,12 +191,12 @@ public class GameController {
             progress = userProgressService.completeLevel(
                     userId, levelId, progress.getCorrectCount(), progress.getTotalScore(), timeUsed);
             
-            // 获取排行榜
-            List<UserProgress> leaderboard = userProgressService.getLevelLeaderboard(levelId, 10);
+            // Leaderboard feature removed
+            // List<UserProgress> leaderboard = userProgressService.getLevelLeaderboard(levelId, 10); 
             
             Map<String, Object> result = new HashMap<>();
             result.put("progress", progress);
-            result.put("leaderboard", leaderboard);
+            // result.put("leaderboard", leaderboard); // Leaderboard feature removed
             
             return ApiResponse.success(result);
         } catch (Exception e) {
