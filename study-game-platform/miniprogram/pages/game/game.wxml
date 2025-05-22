@@ -111,16 +111,7 @@
       </view>
     </view>
 
-    <view class="leaderboard">
-      <view class="leaderboard-title">排行榜</view>
-      <view class="leaderboard-list">
-        <view class="leaderboard-item" wx:for="{{leaderboard}}" wx:key="index">
-          <text class="rank">{{index + 1}}</text>
-          <text class="username">{{item.userId}}</text>
-          <text class="score">{{item.totalScore}}分</text>
-        </view>
-      </view>
-    </view>
+    <!-- Leaderboard display removed -->
 
     <view class="action-buttons">
       <view class="action-button" bindtap="viewWrongQuestions">查看错题</view>

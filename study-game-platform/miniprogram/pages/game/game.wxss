@@ -313,57 +313,7 @@
   font-weight: bold;
 }
 
-.leaderboard {
-  width: 100%;
-  background-color: white;
-  border-radius: 20rpx;
-  padding: 30rpx;
-  box-sizing: border-box;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
-  margin-bottom: 30rpx;
-}
-
-.leaderboard-title {
-  font-size: 36rpx;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 20rpx;
-  text-align: center;
-}
-
-.leaderboard-list {
-  width: 100%;
-}
-
-.leaderboard-item {
-  display: flex;
-  align-items: center;
-  padding: 20rpx 0;
-  border-bottom: 1rpx solid #f1f1f1;
-}
-
-.leaderboard-item:last-child {
-  border-bottom: none;
-}
-
-.rank {
-  width: 60rpx;
-  font-size: 32rpx;
-  font-weight: bold;
-  color: #333;
-}
-
-.username {
-  flex: 1;
-  font-size: 32rpx;
-  color: #333;
-}
-
-.score {
-  font-size: 32rpx;
-  color: #3a7bd5;
-  font-weight: bold;
-}
+/* Leaderboard related CSS styles removed */
 
 .answer-result {
   margin-top: 30rpx;

@@ -115,43 +115,34 @@ Page({
       url: '/api/user-progress/chapter/' + chapterId,
       success: function(res) {
         if (res.code === 200) {
-          const progress = res.data;
-          let lastCompleted = true; // 第一关默认可访问
+          const userProgressData = res.data; // Assuming res.data is the UserProgress list or wrapper
+          const levelProgressMap = new Map();
+          if (userProgressData && Array.isArray(userProgressData.levelProgressList)) {
+            userProgressData.levelProgressList.forEach(p => levelProgressMap.set(p.levelId, p));
+          } else if (Array.isArray(userProgressData)) { // If API returns a list directly
+             userProgressData.forEach(p => levelProgressMap.set(p.levelId, p));
+          }
           
-          // 根据用户进度标记关卡状态
           levels.forEach((level, index) => {
-            // 获取当前关卡的完成率
-            const levelProgress = progress.levelProgressList.find(lp => lp.levelId === level.id) || {
-              completionRate: 0,
-              completed: false
-            };
-            
-            // 判断关卡解锁状态
-            if (index === 0) {
-              // 第一关总是解锁的
+            const progress = levelProgressMap.get(level.id);
+
+            if (progress) {
+              // UserProgress exists for this level
               level.isLocked = false;
-              
-              if (levelProgress.completed) {
+              if (progress.status === 2) { // Assuming status 2 means 'completed'
                 level.statusText = '已完成';
                 level.statusClass = 'status-completed';
-                lastCompleted = true;
-              } else {
+              } else { // Assuming status 1 (or any other) means 'unlocked' or 'in progress'
                 level.statusText = '可挑战';
                 level.statusClass = 'status-available';
               }
             } else {
-              // 其他关卡需要判断前一关是否完成
-              if (lastCompleted) {
+              // No UserProgress for this level
+              if (index === 0) {
+                // First level is unlocked by default if no progress record
                 level.isLocked = false;
-                
-                if (levelProgress.completed) {
-                  level.statusText = '已完成';
-                  level.statusClass = 'status-completed';
-                  lastCompleted = true;
-                } else {
-                  level.statusText = '可挑战';
-                  level.statusClass = 'status-available';
-                }
+                level.statusText = '可挑战';
+                level.statusClass = 'status-available';
               } else {
                 level.isLocked = true;
                 level.statusText = '未解锁';
@@ -191,6 +182,8 @@ Page({
         level.statusClass = 'status-locked';
       }
     });
+    // This function is a fallback, so the original logic for setDefaultLevelStatus is fine.
+    // It ensures only the first level is playable if progress data is unavailable.
     
     that.setData({
       levels: levels,

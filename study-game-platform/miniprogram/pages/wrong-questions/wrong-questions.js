@@ -23,7 +23,14 @@ Page({
     currentTrainingIndex: 0,
     trainingMode: false,
     trainingAnswer: '',
-    trainingResult: null
+    trainingResult: null,
+    // --- Re-attempt Modal Data ---
+    showReattemptModal: false,
+    reattemptQuestion: null,
+    userSelectedReattemptAnswer: '',
+    reattemptFeedback: '',
+    reattemptFeedbackIsCorrect: false
+    // --- End Re-attempt Modal Data ---
   },
 
   onLoad: function (options) {
@@ -700,5 +707,104 @@ Page({
         }
       }
     });
+  },
+
+  // --- Re-attempt Functionality ---
+  parseQuestionOptions: function(question) {
+    const parsedOptions = [];
+    if (!question) return parsedOptions;
+
+    // Assuming question.type is already normalized (e.g., 'SINGLE_CHOICE', 'TRUE_FALSE')
+    // And optionA, optionB, etc. are populated by processAndDisplayQuestions
+    
+    if (question.type === 'TRUE_FALSE') {
+        // Handle TRUE_FALSE specifically if options are not A/B/C/D
+        // For now, assume they might use optionA for True, optionB for False
+        if (question.optionA) parsedOptions.push({ key: 'A', text: question.optionA }); // Or use 'T' as key
+        if (question.optionB) parsedOptions.push({ key: 'B', text: question.optionB }); // Or use 'F' as key
+    } else {
+        // For SINGLE_CHOICE, MULTIPLE_CHOICE (though re-attempt is usually for single answer)
+        if (question.optionA) parsedOptions.push({ key: 'A', text: question.optionA });
+        if (question.optionB) parsedOptions.push({ key: 'B', text: question.optionB });
+        if (question.optionC) parsedOptions.push({ key: 'C', text: question.optionC });
+        if (question.optionD) parsedOptions.push({ key: 'D', text: question.optionD });
+    }
+    
+    // Fallback if options were not in optionA..D but in a JSON string that wasn't fully parsed earlier
+    // This part might be redundant if processAndDisplayQuestions is robust
+    if (parsedOptions.length === 0 && question.options && typeof question.options === 'string') {
+        try {
+            const optionsArray = JSON.parse(question.options);
+            if (Array.isArray(optionsArray)) {
+                const optionKeys = ['A', 'B', 'C', 'D'];
+                optionsArray.forEach((optText, index) => {
+                    if (index < optionKeys.length) {
+                        parsedOptions.push({ key: optionKeys[index], text: optText });
+                    }
+                });
+            }
+        } catch (e) {
+            console.error("Error parsing question.options in parseQuestionOptions:", e);
+        }
+    }
+    console.log("Parsed options for reattempt: ", parsedOptions);
+    return parsedOptions;
+  },
+
+  handleOpenReattemptModal: function(e) {
+    const question = e.currentTarget.dataset.question;
+    console.log("Opening reattempt modal for question:", question);
+    const parsedOptions = this.parseQuestionOptions(question);
+
+    this.setData({
+      reattemptQuestion: {
+        ...question,
+        parsedOptions: parsedOptions,
+        // Ensure 'answer' field exists, falling back to 'correctAnswer'
+        answer: question.correctAnswer || question.answer 
+      },
+      showReattemptModal: true,
+      userSelectedReattemptAnswer: '',
+      reattemptFeedback: '',
+      reattemptFeedbackIsCorrect: false
+    });
+  },
+
+  selectReattemptAnswer: function(e) {
+    this.setData({
+      userSelectedReattemptAnswer: e.currentTarget.dataset.answerKey
+    });
+  },
+
+  submitReattemptAnswer: function() {
+    if (!this.data.userSelectedReattemptAnswer) {
+      wx.showToast({ title: '请选择答案', icon: 'none' });
+      return;
+    }
+    const question = this.data.reattemptQuestion;
+    const isCorrect = this.data.userSelectedReattemptAnswer === question.answer;
+    let feedbackMessage = '';
+
+    if (isCorrect) {
+      feedbackMessage = '回答正确！';
+    } else {
+      feedbackMessage = `回答错误。正确答案是: ${question.answer}。`;
+      // Note: question.explanation should contain the analysis text.
+    }
+    this.setData({
+      reattemptFeedback: feedbackMessage,
+      reattemptFeedbackIsCorrect: isCorrect
+    });
+  },
+
+  closeReattemptModal: function() {
+    this.setData({
+      showReattemptModal: false,
+      userSelectedReattemptAnswer: '', // Reset for next time
+      reattemptFeedback: '',
+      reattemptFeedbackIsCorrect: false
+      // reattemptQuestion: null, // Optional: clear question to save memory if modals are heavy
+    });
   }
+  // --- End Re-attempt Functionality ---
 });

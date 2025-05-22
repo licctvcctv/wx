@@ -40,6 +40,16 @@ public interface LevelRepository extends JpaRepository<Level, Long> {
      * @return 关卡列表
      */
     List<Level> findByChapterIdAndStatusOrderBySortOrderAsc(Long chapterId, Integer status);
+
+    /**
+     * Finds levels within a specific chapter that have a sortOrder greater than a given value,
+     * ordered by sortOrder in ascending order.
+     *
+     * @param chapterId the ID of the chapter
+     * @param sortOrder the sort order to compare against
+     * @return a list of levels matching the criteria
+     */
+    List<Level> findByChapterIdAndSortOrderGreaterThanOrderBySortOrderAsc(Long chapterId, Integer sortOrder);
     
     /**
      * 根据多个章节ID查询所有关卡

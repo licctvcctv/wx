@@ -1,88 +1,139 @@
 <!-- pages/userStats/userStats.wxml -->
 <view class="container">
-  <view class="header">
-    <text class="title">我的学习统计</text>
-  </view>
-  
-  <!-- 学习概览 -->
-  <view class="stats-card">
-    <view class="card-title">学习概览</view>
-    <view class="stats-overview">
-      <view class="stat-item">
-        <text class="stat-value">{{userStats.totalAnswers || 0}}</text>
-        <text class="stat-label">总答题数</text>
-      </view>
-      <view class="stat-item">
-        <text class="stat-value">{{userStats.correctRate || 0}}%</text>
-        <text class="stat-label">答题正确率</text>
-      </view>
-      <view class="stat-item">
-        <text class="stat-value">{{userStats.totalScore || 0}}</text>
-        <text class="stat-label">累计得分</text>
-      </view>
-    </view>
-  </view>
-  
-  <!-- 章节完成率 -->
-  <view class="stats-card">
-    <view class="card-title">章节完成率</view>
-    <view class="progress-container" wx:if="{{chapterStats.chapters && chapterStats.chapters.length > 0}}">
-      <view class="progress-item" wx:for="{{chapterStats.chapters}}" wx:key="chapterId">
-        <view class="progress-info">
-          <text class="progress-name">{{item.chapterName}}</text>
-          <text class="progress-percentage">{{item.completionRate}}%</text>
-        </view>
-        <view class="progress-bar">
-          <view class="progress-filled" style="width: {{item.completionRate}}%;"></view>
-        </view>
-      </view>
-    </view>
-    <view class="no-data" wx:else>
-      <text>暂无章节学习数据</text>
-    </view>
-  </view>
-  
-  <!-- 学科学习情况 -->
-  <view class="stats-card">
-    <view class="card-title">学科学习情况</view>
-    <view class="subject-container" wx:if="{{subjectStats.subjects && subjectStats.subjects.length > 0}}">
-      <view class="subject-item" wx:for="{{subjectStats.subjects}}" wx:key="subjectId">
-        <view class="subject-info">
-          <text class="subject-name">{{item.subjectName}}</text>
-          <view class="subject-details">
-            <text>答题数: {{item.answerCount}}</text>
-            <text>正确率: {{item.correctRate}}%</text>
-            <text>平均分: {{item.avgScore}}</text>
-          </view>
-        </view>
-      </view>
-    </view>
-    <view class="no-data" wx:else>
-      <text>暂无学科学习数据</text>
-    </view>
-  </view>
-  
-  <!-- 学习趋势 -->
-  <view class="stats-card">
-    <view class="card-title">近7天学习趋势</view>
-    <view class="trend-container" wx:if="{{learningTrend.dates && learningTrend.dates.length > 0}}">
-      <view class="trend-chart">
-        <!-- 这里可以使用小程序的图表组件，如wx-charts或者ec-canvas -->
-        <!-- 由于组件依赖较复杂，这里使用简单的柱状图表示 -->
-        <view class="chart-bars">
-          <view class="chart-bar" wx:for="{{learningTrend.answerCounts}}" wx:key="index" wx:for-item="count">
-            <view class="chart-bar-value" style="height: {{count > 0 ? (count / maxAnswerCount) * 100 : 0}}%;">
-              <text wx:if="{{count > 0}}">{{count}}</text>
-            </view>
-            <text class="chart-bar-date">{{formatDate(learningTrend.dates[index])}}</text>
-          </view>
-        </view>
-      </view>
-    </view>
-    <view class="no-data" wx:else>
-      <text>暂无学习趋势数据</text>
-    </view>
+  <!-- Full Page Loading -->
+  <view wx:if="{{loading && firstLoad}}" class="loading-overlay">
+    <text class="loading-text">加载学习统计中...</text>
   </view>
 
-  <view class="back-btn" bindtap="goBack">返回</view>
+  <!-- Page Content -->
+  <block wx:else>
+    <!-- Error Display -->
+    <view wx:if="{{pageError}}" class="error-container">
+      <text class="error-message">{{pageError}}</text>
+      <button class="retry-button" bindtap="handleRetry">重试</button>
+      <button class="back-button-error" bindtap="goBack">返回</button>
+    </view>
+
+    <!-- Statistics Content -->
+    <block wx:else>
+      <view class="header">
+        <text class="title">我的学习统计</text>
+      </view>
+
+      <!-- Overall Stats -->
+      <view wx:if="{{userStats.totalAnswers === undefined && !loading}}" class="stats-card no-data-card">
+         <text class="no-data-text">暂无学习概览数据，开始学习以查看统计！</text>
+      </view>
+      <view wx:elif="{{userStats.totalAnswers === 0 && !loading}}" class="stats-card no-data-card">
+        <view class="card-title">学习概览</view>
+        <text class="no-data-text">您还没有开始答题，快去挑战关卡吧！</text>
+      </view>
+      <view wx:else class="stats-card">
+        <view class="card-title">学习概览</view>
+        <view class="stats-overview">
+          <view class="stat-item">
+            <text class="stat-value">{{userStats.totalAnswers || 0}}</text>
+            <text class="stat-label">总答题数</text>
+          </view>
+          <view class="stat-item">
+            <text class="stat-value">{{userStats.correctRate || 0}}%</text>
+            <text class="stat-label">答题正确率</text>
+          </view>
+          <view class="stat-item">
+            <text class="stat-value">{{userStats.totalScore || 0}}</text>
+            <text class="stat-label">累计得分</text>
+          </view>
+           <view class="stat-item">
+            <text class="stat-value">{{userStats.wrongAnswers || 0}}</text>
+            <text class="stat-label">错题数</text>
+          </view>
+          <view class="stat-item">
+            <text class="stat-value">{{userStats.avgAnswerTime || 0}}s</text>
+            <text class="stat-label">平均用时</text>
+          </view>
+        </view>
+        <view wx:if="{{userStats.questionTypeStats}}" class="question-type-stats">
+          <text class="sub-title">题型分布 (总答题):</text>
+          <view class="type-item" wx:for="{{userStats.questionTypeStats}}" wx:for-item="count" wx:for-key="type">
+            <text>{{type}}: {{count}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- Chapter Completion -->
+      <view class="stats-card">
+        <view class="card-title">章节完成率</view>
+        <view wx:if="{{chapterStats.chapters && chapterStats.chapters.length > 0}}" class="progress-container">
+          <view class="progress-item" wx:for="{{chapterStats.chapters}}" wx:key="chapterId">
+            <view class="progress-info">
+              <text class="progress-name">{{item.chapterName}}</text>
+              <text class="progress-percentage">{{item.completionRate || 0}}%</text>
+            </view>
+            <view class="progress-bar">
+              <view class="progress-filled" style="width: {{item.completionRate || 0}}%;"></view>
+            </view>
+          </view>
+        </view>
+        <view wx:else class="no-data">
+          <text>暂无章节学习数据。</text>
+        </view>
+      </view>
+
+      <!-- Subject Stats -->
+      <view class="stats-card">
+        <view class="card-title">学科学习情况</view>
+        <view wx:if="{{subjectStats.subjects && subjectStats.subjects.length > 0}}" class="subject-container">
+          <view class="subject-item" wx:for="{{subjectStats.subjects}}" wx:key="subjectId">
+            <view class="subject-info">
+              <text class="subject-name">{{item.subjectName}}</text>
+              <view class="subject-details">
+                <text>答题数: {{item.answerCount || 0}}</text>
+                <text>正确率: {{item.correctRate || 0}}%</text>
+                <text>平均分: {{item.avgScore || 0}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+        <view wx:else class="no-data">
+          <text>暂无学科学习数据。</text>
+        </view>
+      </view>
+
+      <!-- Learning Trend -->
+      <view class="stats-card">
+        <view class="card-title">近7天学习趋势</view>
+        <view wx:if="{{learningTrend.dates && learningTrend.dates.length > 0}}" class="trend-container">
+          <view class="trend-chart">
+            <!-- Replace simple bars with ec-canvas if option is available -->
+            <view wx:if="{{ecChartOption}}" class="echart-container">
+              <ec-canvas id="learning-trend-chart" canvas-id="learningTrendChart" ec="{{ {option: ecChartOption} }}"></ec-canvas>
+            </view>
+            <!-- Fallback to simple bars if ecChartOption is null or not preferred -->
+            <view wx:else class="chart-bars">
+               <view class="chart-legend">
+                <view class="legend-item"><view class="legend-color-answers"></view> 答题数</view>
+                <view class="legend-item"><view class="legend-color-accuracy"></view> 正确率(%)</view>
+              </view>
+              <view class="chart-bar-group" wx:for="{{learningTrend.dates}}" wx:key="index" wx:for-item="date">
+                <view class="chart-bar-wrapper">
+                  <view class="chart-bar-value answers-bar" style="height: {{(learningTrend.answerCounts[index] || 0) > 0 ? ((learningTrend.answerCounts[index] || 0) / maxAnswerCount) * 70 : 0}}%;">
+                    <text wx:if="{{(learningTrend.answerCounts[index] || 0) > 0}}">{{learningTrend.answerCounts[index]}}</text>
+                  </view>
+                  <view class="chart-bar-value accuracy-text" style="bottom: {{(learningTrend.answerCounts[index] || 0) > 0 ? ((learningTrend.answerCounts[index] || 0) / maxAnswerCount) * 70 + 5 : 5}}%;">
+                    {{learningTrend.correctRates[index] || 0}}%
+                  </view>
+                </view>
+                <text class="chart-bar-date">{{formatDate(date)}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+        <view wx:else class="no-data">
+          <text>暂无学习趋势数据。</text> <!-- This covers case where learningTrend.dates is empty -->
+        </view>
+      </view>
+
+      <button class="back-button" bindtap="goBack">返回</button>
+    </block>
+  </block>
 </view>

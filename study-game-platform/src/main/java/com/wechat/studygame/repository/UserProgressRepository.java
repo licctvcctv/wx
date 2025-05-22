@@ -49,23 +49,6 @@ public interface UserProgressRepository extends JpaRepository<UserProgress, Long
      */
     List<UserProgress> findByUserId(Long userId);
 
-    /**
-     * 查询指定关卡的排行榜
-     *
-     * @param levelId 关卡ID
-     * @param limit 限制数量
-     * @return 用户进度列表
-     */
-    @Query(value = "SELECT * FROM user_progress up WHERE up.level_id = :levelId AND up.status = 2 ORDER BY up.total_score DESC, up.time_used ASC LIMIT :limit", nativeQuery = true)
-    List<UserProgress> findTopScoresByLevel(Long levelId, int limit);
-
-    /**
-     * 查询指定章节的排行榜
-     *
-     * @param chapterId 章节ID
-     * @param limit 限制数量
-     * @return 用户进度列表
-     */
-    @Query(value = "SELECT up.user_id as userId, SUM(up.total_score) as totalScore FROM user_progress up WHERE up.chapter_id = :chapterId AND up.status = 2 GROUP BY up.user_id ORDER BY totalScore DESC LIMIT :limit", nativeQuery = true)
-    List<Object[]> findTopScoresByChapter(Long chapterId, int limit);
+    // findTopScoresByLevel method removed
+    // findTopScoresByChapter method removed
 }

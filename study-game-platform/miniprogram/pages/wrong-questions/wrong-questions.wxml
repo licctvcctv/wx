@@ -106,12 +106,48 @@
             <view class="analysis-button" bindtap="showAnalysis" data-id="{{item.id}}">
               <text>查看详细分析</text>
             </view>
+            <!-- 新增：重新做题按钮 -->
+            <view class="action-button reattempt-button" bindtap="handleOpenReattemptModal" data-question="{{item}}">
+              <text>重新做题</text>
+            </view>
           </view>
         </view>
       </view>
     </block>
   </view>
   
+  <!-- Re-attempt Modal -->
+  <view class="modal-overlay" wx:if="{{showReattemptModal}}">
+    <view class="modal-content reattempt-modal">
+      <view class="modal-header">
+        <text class="modal-title">重新做题</text>
+        <view class="close-button" bindtap="closeReattemptModal">×</view>
+      </view>
+      <view class="modal-body" wx:if="{{reattemptQuestion}}">
+        <view class="question-content-reattempt">{{reattemptQuestion.content}}</view>
+        <view class="options-reattempt">
+          <view 
+            wx:for="{{reattemptQuestion.parsedOptions}}" 
+            wx:key="key"
+            class="option-reattempt {{userSelectedReattemptAnswer === item.key ? 'selected' : ''}}"
+            bindtap="selectReattemptAnswer"
+            data-answer-key="{{item.key}}">
+            <text class="option-key">{{item.key}}.</text>
+            <text class="option-text">{{item.text}}</text>
+          </view>
+        </view>
+        <button class="submit-reattempt-button" bindtap="submitReattemptAnswer" disabled="{{!userSelectedReattemptAnswer}}">提交答案</button>
+        <view class="reattempt-feedback" wx:if="{{reattemptFeedback}}">
+          <text class="{{reattemptFeedbackIsCorrect ? 'correct-feedback' : 'wrong-feedback'}}">{{reattemptFeedback}}</text>
+          <view wx:if="{{!reattemptFeedbackIsCorrect && reattemptQuestion.explanation}}" class="analysis-text-reattempt">
+            <text class="analysis-title-reattempt">解析：</text>
+            <text>{{reattemptQuestion.explanation}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
   <!-- 错题分析面板 -->
   <view class="analysis-panel {{showAnalysisPanel ? 'show' : ''}}" wx:if="{{showAnalysisPanel}}">
     <view class="analysis-header">

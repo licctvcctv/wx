@@ -60,23 +60,8 @@ public interface UserProgressService {
      */
     UserProgress completeLevel(Long userId, Long levelId, Integer correctCount, Integer totalScore, Long timeUsed);
 
-    /**
-     * 获取关卡排行榜
-     *
-     * @param levelId 关卡ID
-     * @param limit 限制数量
-     * @return 排行榜列表
-     */
-    List<UserProgress> getLevelLeaderboard(Long levelId, int limit);
-
-    /**
-     * 获取章节排行榜
-     *
-     * @param chapterId 章节ID
-     * @param limit 限制数量
-     * @return 排行榜列表, Map中的key为userId和totalScore
-     */
-    List<Map<String, Object>> getChapterLeaderboard(Long chapterId, int limit);
+    // getLevelLeaderboard method signature removed
+    // getChapterLeaderboard method signature removed
 
     /**
      * 获取用户章节完成率统计
